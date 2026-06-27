@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>About StudyCoach AI</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body style="padding:40px;max-width:900px;margin:auto;">
+
+<h1>About StudyCoach AI</h1>
+
+<p>StudyCoach AI is an AI-powered learning platform helping students study smarter.</p>
+
+<ul>
+<li>AI Tutoring</li>
+<li>Homework Help</li>
+<li>Study Plans</li>
+<li>Flashcards</li>
+<li>Quizzes</li>
+<li>Progress Tracking</li>
+</ul>
+
+<p>Our mission is to make high-quality learning available to every student.</p>
+
+<p><a href="/">← Back to StudyCoach AI</a></p>
+
+</body>
+</html>
