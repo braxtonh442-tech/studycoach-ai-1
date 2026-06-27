@@ -1,0 +1,14 @@
+App Store Readiness Checklist
+
+1. Hosted backend online
+2. Cloud database
+3. Secure password reset
+4. Email verification
+5. Real payments/subscriptions
+6. Privacy policy URL
+7. Terms URL
+8. Child safety and moderation
+9. Data deletion request process
+10. App icons and screenshots
+11. Native iOS/Android wrapper or app
+12. TestFlight/internal testing
