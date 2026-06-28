@@ -3,9 +3,9 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
-const { healthRouter } = require("./lib/health");
-const { authRouter } = require("./lib/auth");
-const { studyRouter } = require("./lib/study");
+const { healthRouter } = require("./lib/health.js");
+const { authRouter } = require("./lib/auth.js");
+const { studyRouter } = require("./lib/study.js");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
