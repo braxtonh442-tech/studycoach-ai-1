@@ -2,6 +2,9 @@
 require("dotenv").config();
 const express=require("express"),cors=require("cors"),bcrypt=require("bcryptjs"),jwt=require("jsonwebtoken"),fs=require("fs"),path=require("path"),crypto=require("crypto"),multer=require("multer"),Stripe=require("stripe");
 const { createClient } = require("@supabase/supabase-js");
+const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 const app=express(),PORT=process.env.PORT||3000,JWT_SECRET=process.env.JWT_SECRET||"change-this-secret",OPENAI_API_KEY=process.env.OPENAI_API_KEY||"",OPENAI_MODEL=process.env.OPENAI_MODEL||"gpt-4.1-mini",STRIPE_SECRET_KEY=process.env.STRIPE_SECRET_KEY||"",STRIPE_PRICE_ID=process.env.STRIPE_PRICE_ID||"",APP_URL=process.env.APP_URL||`http://localhost:${PORT}`;
 const stripe=STRIPE_SECRET_KEY?new Stripe(STRIPE_SECRET_KEY):null,DB_PATH=path.join(__dirname,"data","db.json"),UPLOAD_DIR=path.join(__dirname,"data","uploads"),upload=multer({dest:UPLOAD_DIR});
 app.use(cors());app.use(express.json({limit:"10mb"}));app.use(express.static(path.join(__dirname,"public")));
