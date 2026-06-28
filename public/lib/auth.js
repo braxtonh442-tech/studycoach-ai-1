@@ -1,13 +1,17 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const { config, supabase } = require("./config");
 
 const authRouter = express.Router();
 
 function makeToken(user) {
   return jwt.sign(
-    { id: user.id, email: user.email },
+    {
+      id: user.id,
+      email: user.email
+    },
     config.JWT_SECRET,
     { expiresIn: "30d" }
   );
@@ -30,7 +34,9 @@ authRouter.post("/signup", async (req, res) => {
     const { name, email, password, yearLevel, country } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ error: "Name, email and password are required." });
+      return res.status(400).json({
+        error: "Name, email and password are required."
+      });
     }
 
     const cleanEmail = email.toLowerCase().trim();
@@ -42,7 +48,9 @@ authRouter.post("/signup", async (req, res) => {
       .maybeSingle();
 
     if (existing) {
-      return res.status(400).json({ error: "Email already used. Try login instead." });
+      return res.status(400).json({
+        error: "Email already exists."
+      });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -68,14 +76,20 @@ authRouter.post("/signup", async (req, res) => {
       token: makeToken(user),
       user: safeUser(user)
     });
+
   } catch (err) {
-    res.status(500).json({ error: "Signup error: " + err.message });
+    res.status(500).json({
+      error: err.message
+    });
   }
 });
 
 authRouter.post("/login", async (req, res) => {
   try {
-    const cleanEmail = String(req.body.email || "").toLowerCase().trim();
+
+    const cleanEmail = String(req.body.email || "")
+      .toLowerCase()
+      .trim();
 
     const { data: user, error } = await supabase
       .from("users")
@@ -85,36 +99,67 @@ authRouter.post("/login", async (req, res) => {
 
     if (error) throw error;
 
-    if (!user || !(await bcrypt.compare(req.body.password || "", user.password_hash))) {
-      return res.status(401).json({ error: "Wrong email or password." });
+    if (!user) {
+      return res.status(401).json({
+        error: "Wrong email or password."
+      });
+    }
+
+    const ok = await bcrypt.compare(
+      req.body.password || "",
+      user.password_hash
+    );
+
+    if (!ok) {
+      return res.status(401).json({
+        error: "Wrong email or password."
+      });
     }
 
     res.json({
       token: makeToken(user),
       user: safeUser(user)
     });
+
   } catch (err) {
-    res.status(500).json({ error: "Login error: " + err.message });
+    res.status(500).json({
+      error: err.message
+    });
   }
 });
 
 authRouter.get("/me", async (req, res) => {
-  try {
-    const token = (req.headers.authorization || "").replace("Bearer ", "");
-    const decoded = jwt.verify(token, config.JWT_SECRET);
 
-    const { data: user, error } = await supabase
+  try {
+
+    const token = (req.headers.authorization || "")
+      .replace("Bearer ", "");
+
+    const decoded = jwt.verify(
+      token,
+      config.JWT_SECRET
+    );
+
+    const { data: user } = await supabase
       .from("users")
       .select("*")
       .eq("id", decoded.id)
       .maybeSingle();
 
-    if (error) throw error;
+    res.json({
+      user: user ? safeUser(user) : null
+    });
 
-    res.json({ user: user ? safeUser(user) : null });
   } catch {
-    res.status(401).json({ error: "Please log in again." });
+
+    res.status(401).json({
+      error: "Please log in."
+    });
+
   }
+
 });
 
-module.exports = { authRouter };
+module.exports = {
+  authRouter
+};
