@@ -1,24 +1,21 @@
-const { createClient } = require("@supabase/supabase-js");
-const Stripe = require("stripe");
+require("dotenv").config();
 
-const config = {
-  JWT_SECRET: process.env.JWT_SECRET || "change-this-secret",
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
-  OPENAI_MODEL: process.env.OPENAI_MODEL || "gpt-4.1-mini",
-  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || "",
-  STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID || "",
-  APP_URL: process.env.APP_URL || "https://studycoach.training",
-  SUPABASE_URL: process.env.SUPABASE_URL || "",
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-};
+const express = require("express");
+const cors = require("cors");
 
-const supabase = createClient(
-  config.SUPABASE_URL,
-  config.SUPABASE_SERVICE_ROLE_KEY
-);
+const { healthRouter } = require("./lib/health");
+const { authRouter } = require("./lib/auth");
 
-const stripe = config.STRIPE_SECRET_KEY
-  ? new Stripe(config.STRIPE_SECRET_KEY)
-  : null;
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-module.exports = { config, supabase, stripe };
+app.use(cors());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.static("public"));
+
+app.use("/api", healthRouter);
+app.use("/api", authRouter);
+
+app.listen(PORT, () => {
+  console.log(`StudyCoach AI running on port ${PORT}`);
+});
