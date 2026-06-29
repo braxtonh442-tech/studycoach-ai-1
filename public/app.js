@@ -307,7 +307,8 @@ async function makePlan(){
 }
 
 async function makeQuiz(){
-  const d = await post("/api/quiz", {
+
+  const d = await post("/api/quiz",{
     topic: value("quizTopic"),
     subject: value("subject")
   }, true);
@@ -316,6 +317,18 @@ async function makeQuiz(){
     if(el("quizOut")) el("quizOut").textContent = d.error;
     return;
   }
+
+  if(el("quizOut")){
+    el("quizOut").innerHTML = `
+      <h3>🧠 ${escapeHtml(d.quiz.topic)}</h3>
+      <ol>
+        ${d.quiz.questions.map(q => `<li>${escapeHtml(q)}</li>`).join("")}
+      </ol>
+    `;
+  }
+
+  await loadDashboard();
+}
 
   if(el("quizOut")){
     el("quizOut").textContent = d.quiz.questions.map((q,i) => `${i+1}. ${q}`).join("\n");
