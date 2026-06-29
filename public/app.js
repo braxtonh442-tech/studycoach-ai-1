@@ -330,13 +330,7 @@ async function makeQuiz(){
   await loadDashboard();
 }
 
-  if(el("quizOut")){
-    el("quizOut").textContent = d.quiz.questions.map((q,i) => `${i+1}. ${q}`).join("\n");
-  }
-
-  await loadDashboard();
-}
-
+ 
 async function makeFlash(){
   const d = await post("/api/flashcards", {
     topic: value("flashTopic"),
