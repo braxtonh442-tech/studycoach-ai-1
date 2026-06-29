@@ -180,10 +180,22 @@ function addMsg(role, text){
 
 async function loadHistory(){
   if(!token || !el("history")) return;
+
   const d = await get("/api/history");
-  el("history").innerHTML = (d.chats || [])
-    .map(c => `<div class="hist">${escapeHtml(c.message)}</div>`)
-    .join("");
+  const chats = d.chats || [];
+
+  if(chats.length === 0){
+    el("history").innerHTML = "<p>No chats yet.</p>";
+    return;
+  }
+
+  el("history").innerHTML = chats.map(c => `
+    <button class="hist" onclick="openHistoryChat('${c.id}')">
+      ${escapeHtml(c.message || "Untitled chat")}
+    </button>
+  `).join("");
+function openHistoryChat(id){
+  alert("Opening chat: " + id);
 }
 
 async function loadDashboard(){
