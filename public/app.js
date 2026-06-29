@@ -221,10 +221,39 @@ async function loadDashboard(){
   if(!token) return;
   const d = await get("/api/progress");
 
-  if(el("dashTasks")) el("dashTasks").textContent = d.total || 0;
-  if(el("dashStreak")) el("dashStreak").textContent = d.streak || 0;
-  if(el("dashBadges")) el("dashBadges").textContent = (d.badges || []).length;
-  if(el("dashWeak")) el("dashWeak").textContent = (d.weakAreas || [])[0] || "None";
+  const hours = Math.round((d.estimatedStudyMinutes || 0) / 60);
+  const progress = d.progressPercent || 0;
+  const badges = d.badges || [];
+
+  const stats = document.querySelector("#dashboardPage .stats");
+  if(stats){
+    stats.innerHTML = `
+      <div class="stat"><b>${d.streak || 0}</b><span>🔥 Day streak</span></div>
+      <div class="stat"><b>${d.total || 0}</b><span>📚 Questions</span></div>
+      <div class="stat"><b>${hours}h</b><span>⏱ Study time</span></div>
+      <div class="stat"><b>${badges.length}</b><span>🏆 Badges</span></div>
+    `;
+  }
+
+  const dash = el("dashboardPage");
+  if(dash && !el("proDashboard")){
+    dash.insertAdjacentHTML("beforeend", `
+      <div id="proDashboard" class="panel">
+        <h3>Progress overview</h3>
+        <p><b>Favourite subject:</b> ${escapeHtml(d.favouriteSubject || "None")}</p>
+        <p><b>Focus area:</b> ${escapeHtml((d.weakAreas || [])[0] || "None")}</p>
+
+        <div style="background:#e5e7eb;border-radius:999px;overflow:hidden;height:18px;margin:14px 0;">
+          <div style="width:${progress}%;height:18px;background:#111827;"></div>
+        </div>
+
+        <p><b>${progress}%</b> weekly progress</p>
+
+        <h3>Badges</h3>
+        <p>${badges.length ? badges.map(b => "🏅 " + escapeHtml(b)).join("<br>") : "No badges yet."}</p>
+      </div>
+    `);
+  }
 }
 
 async function loadProgress(){
