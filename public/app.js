@@ -275,6 +275,8 @@ async function loadProgress(){
 }
 
 async function loadParent(){
+  if(!requirePremium("Parent dashboard")) return;
+  
   setPage("parent");
   const d = await get("/api/progress");
 
@@ -352,6 +354,8 @@ async function makeFlash(){
 }
 
 async function uploadHomework(){
+  if(!requirePremium("Homework upload")) return;
+  
   const fileBox = el("homeworkFile");
   const f = fileBox?.files?.[0];
 
@@ -392,6 +396,8 @@ function startVoice(){
 }
 
 async function loadTeacher(){
+  if(!requirePremium("Teacher dashboard")) return;
+  
   const d = await get("/api/teacher-summary");
 
   if(el("teacherOut")){
