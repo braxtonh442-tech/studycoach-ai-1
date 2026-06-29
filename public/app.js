@@ -400,7 +400,17 @@ async function loadTeacher(){
       .join("\n") || "No students yet.";
   }
 }
+function isPremium(){
+  return currentUser && currentUser.plan === "premium";
+}
 
+function requirePremium(featureName){
+  if(isPremium()) return true;
+
+  alert(featureName + " is a Premium feature. Please upgrade to unlock it.");
+  setPage("pricing");
+  return false;
+}
 async function stripeUpgrade(){
   const d = await post("/api/create-checkout-session", {}, true);
 
