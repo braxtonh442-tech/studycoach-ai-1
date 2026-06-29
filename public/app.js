@@ -197,9 +197,24 @@ async function loadHistory(){
   
 }
 
-function openHistoryChat(id){
-  alert("Opening chat: " + id);
-  
+async function openHistoryChat(id){
+  setPage("chat");
+
+  const d = await get("/api/chat/" + id);
+
+  if(d.error){
+    alert(d.error);
+    return;
+  }
+
+  const chat = d.chat;
+
+  if(el("messages")){
+    el("messages").innerHTML = "";
+  }
+
+  addMsg("user", chat.message);
+  addMsg("bot", chat.answer);
 }
 
 async function loadDashboard(){
