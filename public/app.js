@@ -194,9 +194,12 @@ async function loadHistory(){
       ${escapeHtml(c.message || "Untitled chat")}
     </button>
   `).join("");
+  
 }
+
 function openHistoryChat(id){
   alert("Opening chat: " + id);
+  
 }
 
 async function loadDashboard(){
