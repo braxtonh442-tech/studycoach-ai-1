@@ -2,7 +2,7 @@ require("dotenv").config();
 const multer = require("multer");
 const express = require("express");
 const cors = require("cors");
-
+const { stripeRouter } = require("./lib/stripe.js");
 const { healthRouter } = require("./lib/health.js");
 const { authRouter } = require("./lib/auth.js");
 const { studyRouter } = require("./lib/study.js");
@@ -15,7 +15,7 @@ app.use(express.static("public"));
 app.use("/api", studyRouter);
 app.use("/api", healthRouter);
 app.use("/api", authRouter);
-
+app.use("/api", stripeRouter);
 app.listen(PORT, () => {
   console.log(`StudyCoach AI running on port ${PORT}`);
 });
