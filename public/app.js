@@ -231,7 +231,13 @@ async function loadDashboard(){
   const progress = d.progressPercent || 0;
   const badges = d.badges || [];
   const name = currentUser?.name || "student";
-
+  const xp = d.xp || 0;
+const level = d.level || 1;
+const nextLevelXp = level * 100;
+const currentLevelStart = (level - 1) * 100;
+const xpIntoLevel = xp - currentLevelStart;
+const xpNeeded = nextLevelXp - currentLevelStart;
+const xpPercent = Math.min(100, Math.round((xpIntoLevel / xpNeeded) * 100));
   const dash = el("dashboardPage");
   if(!dash) return;
 
@@ -276,16 +282,28 @@ async function loadDashboard(){
   <p>Your Level</p>
 </div>
 
-    <div class="dashboard-grid">
-      <div class="panel big-panel">
-        <h3>📈 Weekly progress</h3>
-        <div class="progress-track">
-          <div class="progress-fill" style="width:${progress}%"></div>
-        </div>
-        <p><b>${progress}%</b> toward this week’s goal</p>
-        <p><b>Favourite subject:</b> ${escapeHtml(d.favouriteSubject || "None")}</p>
-        <p><b>Focus area:</b> ${escapeHtml((d.weakAreas || [])[0] || "None")}</p>
-      </div>
+<div class="dashboard-grid">
+  <div class="panel big-panel">
+    <h3>📈 Weekly progress</h3>
+
+    <div class="progress-track">
+      <div class="progress-fill" style="width:${progress}%"></div>
+    </div>
+
+    <p><b>${progress}%</b> toward this week's goal</p>
+
+    <h3>⭐ Level ${level}</h3>
+
+    <div class="progress-track">
+      <div class="progress-fill" style="width:${xpPercent}%"></div>
+    </div>
+
+    <p><b>${xp}</b> / ${nextLevelXp} XP to reach Level ${level + 1}</p>
+
+    <p><b>Favourite subject:</b> ${escapeHtml(d.favouriteSubject || "None")}</p>
+
+    <p><b>Focus area:</b> ${escapeHtml((d.weakAreas || [])[0] || "None")}</p>
+  </div>
 
       <div class="panel">
         <h3>🏅 Badges</h3>
