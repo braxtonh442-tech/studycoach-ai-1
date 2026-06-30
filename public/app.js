@@ -375,7 +375,7 @@ async function uploadHomework(){
   form.append("file", file);
   form.append("note", noteBox?.value || "");
 
-  const token = localStorage.getItem("token");
+ // Use the global token variable that's already loaded
 
   const r = await fetch("/api/upload-homework", {
     method: "POST",
