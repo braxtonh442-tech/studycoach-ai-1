@@ -264,12 +264,17 @@ async function loadDashboard(){
         <p>Study time</p>
       </div>
 
-      <div class="pro-card">
-        <span>🏆</span>
-        <b>${badges.length}</b>
-        <p>Badges earned</p>
-      </div>
-    </div>
+     <div class="pro-card">
+  <span>⭐</span>
+  <b>${d.xp || 0}</b>
+  <p>Total XP</p>
+</div>
+
+<div class="pro-card">
+  <span>🏆</span>
+  <b>Level ${d.level || 1}</b>
+  <p>Your Level</p>
+</div>
 
     <div class="dashboard-grid">
       <div class="panel big-panel">
