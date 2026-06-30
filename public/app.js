@@ -393,21 +393,9 @@ async function uploadHomework(){
   }
 
   out.textContent = d.message || "Homework uploaded successfully!";
+  
 }
-  const fd = new FormData();
-  fd.append("homework", f);
-  fd.append("note", value("homeworkNote"));
 
-  const r = await fetch("/api/upload-homework", {
-    method: "POST",
-    headers: { Authorization: "Bearer " + token },
-    body: fd
-  });
-
-  const d = await r.json();
-  if(el("uploadOut")) el("uploadOut").textContent = d.message || d.error || "Uploaded.";
-  await loadDashboard();
-}
 
 function startVoice(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
