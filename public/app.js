@@ -308,10 +308,17 @@ const xpPercent = Math.min(100, Math.round((xpIntoLevel / xpNeeded) * 100));
   </div>
 
       <div class="panel">
-        <h3>🏅 Badges</h3>
-        <div class="badge-list">
-          ${badges.length ? badges.map(b => `<span class="badge">🏅 ${escapeHtml(b)}</span>`).join("") : "<p>No badges yet.</p>"}
-        </div>
+        <h3>🏆 Achievements</h3>
+
+<div class="badge-list">
+  ${(d.achievements || []).length
+    ? d.achievements.map(a =>
+        `<span class="badge">${escapeHtml(a)}</span>`
+      ).join("")
+    : "<p>No achievements unlocked yet.</p>"
+  }
+</div>
+
       </div>
 
       <div class="panel">
