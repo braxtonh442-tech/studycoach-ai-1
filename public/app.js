@@ -230,36 +230,79 @@ async function loadDashboard(){
   const hours = Math.round((d.estimatedStudyMinutes || 0) / 60);
   const progress = d.progressPercent || 0;
   const badges = d.badges || [];
-
-  const stats = document.querySelector("#dashboardPage .stats");
-  if(stats){
-    stats.innerHTML = `
-      <div class="stat"><b>${d.streak || 0}</b><span>🔥 Day streak</span></div>
-      <div class="stat"><b>${d.total || 0}</b><span>📚 Questions</span></div>
-      <div class="stat"><b>${hours}h</b><span>⏱ Study time</span></div>
-      <div class="stat"><b>${badges.length}</b><span>🏆 Badges</span></div>
-    `;
-  }
+  const name = currentUser?.name || "student";
 
   const dash = el("dashboardPage");
-  if(dash && !el("proDashboard")){
-    dash.insertAdjacentHTML("beforeend", `
-      <div id="proDashboard" class="panel">
-        <h3>Progress overview</h3>
+  if(!dash) return;
+
+  dash.innerHTML = `
+    <div class="dash-hero">
+      <div>
+        <p class="eyebrow">StudyCoach AI Dashboard</p>
+        <h1>Welcome back, ${escapeHtml(name)} 👋</h1>
+        <p>Your goal today: 20 minutes of focused study.</p>
+      </div>
+      <button onclick="newChat()">Start studying</button>
+    </div>
+
+    <div class="pro-stats">
+      <div class="pro-card">
+        <span>🔥</span>
+        <b>${d.streak || 0}</b>
+        <p>Day streak</p>
+      </div>
+
+      <div class="pro-card">
+        <span>📚</span>
+        <b>${d.total || 0}</b>
+        <p>Study tasks</p>
+      </div>
+
+      <div class="pro-card">
+        <span>⏱️</span>
+        <b>${hours}h</b>
+        <p>Study time</p>
+      </div>
+
+      <div class="pro-card">
+        <span>🏆</span>
+        <b>${badges.length}</b>
+        <p>Badges earned</p>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="panel big-panel">
+        <h3>📈 Weekly progress</h3>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${progress}%"></div>
+        </div>
+        <p><b>${progress}%</b> toward this week’s goal</p>
         <p><b>Favourite subject:</b> ${escapeHtml(d.favouriteSubject || "None")}</p>
         <p><b>Focus area:</b> ${escapeHtml((d.weakAreas || [])[0] || "None")}</p>
-
-        <div style="background:#e5e7eb;border-radius:999px;overflow:hidden;height:18px;margin:14px 0;">
-          <div style="width:${progress}%;height:18px;background:#111827;"></div>
-        </div>
-
-        <p><b>${progress}%</b> weekly progress</p>
-
-        <h3>Badges</h3>
-        <p>${badges.length ? badges.map(b => "🏅 " + escapeHtml(b)).join("<br>") : "No badges yet."}</p>
       </div>
-    `);
-  }
+
+      <div class="panel">
+        <h3>🏅 Badges</h3>
+        <div class="badge-list">
+          ${badges.length ? badges.map(b => `<span class="badge">🏅 ${escapeHtml(b)}</span>`).join("") : "<p>No badges yet.</p>"}
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>⚡ Quick start</h3>
+        <div class="quick">
+          <button data-prompt="Explain fractions for my year level">Explain fractions</button>
+          <button data-prompt="Quiz me on photosynthesis">Quiz photosynthesis</button>
+          <button data-prompt="Help me write an essay introduction">Essay help</button>
+          <button onclick="setPage('plan')">Make study plan</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  wirePromptButtons();
+
 }
 
 async function loadProgress(){
