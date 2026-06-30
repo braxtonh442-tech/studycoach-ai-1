@@ -354,16 +354,46 @@ async function makeFlash(){
 }
 
 async function uploadHomework(){
-  if(!requirePremium("Homework upload")) return;
-  
-  const fileBox = el("homeworkFile");
-  const f = fileBox?.files?.[0];
 
-  if(!f){
-    if(el("uploadOut")) el("uploadOut").textContent = "Choose a file first.";
+  // Remove this line temporarily while we build the feature.
+  // if(!requirePremium("Homework upload")) return;
+
+  const fileBox = el("homeworkFile");
+  const noteBox = el("homeworkNote");
+  const out = el("uploadOut");
+
+  const file = fileBox?.files?.[0];
+
+  if(!file){
+    out.textContent = "Please choose a homework file first.";
     return;
   }
 
+  out.textContent = "Uploading...";
+
+  const form = new FormData();
+  form.append("file", file);
+  form.append("note", noteBox?.value || "");
+
+  const token = localStorage.getItem("token");
+
+  const r = await fetch("/api/upload-homework", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + token
+    },
+    body: form
+  });
+
+  const d = await r.json();
+
+  if(d.error){
+    out.textContent = d.error;
+    return;
+  }
+
+  out.textContent = d.message || "Homework uploaded successfully!";
+}
   const fd = new FormData();
   fd.append("homework", f);
   fd.append("note", value("homeworkNote"));
