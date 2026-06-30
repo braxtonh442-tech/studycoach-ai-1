@@ -282,6 +282,8 @@ const xpPercent = Math.min(100, Math.round((xpIntoLevel / xpNeeded) * 100));
   <p>Your Level</p>
 </div>
 
+</div>
+
 <div class="dashboard-grid">
   <div class="panel big-panel">
     <h3>📈 Weekly progress</h3>
