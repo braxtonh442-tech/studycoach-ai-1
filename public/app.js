@@ -86,6 +86,10 @@ async function showApp(){
   el("marketing")?.classList.add("hidden");
   el("auth")?.classList.add("hidden");
   el("app")?.classList.remove("hidden");
+
+  const footer = document.querySelector(".site-footer");
+  if (footer) footer.style.display = "none";
+
   await loadMe();
   await loadHistory();
   await loadDashboard();
@@ -105,10 +109,12 @@ async function loadMe(){
 }
 
 function logout(){
+  const footer = document.querySelector(".site-footer");
+  if (footer) footer.style.display = "block";
+
   localStorage.removeItem("studycoach_7_token");
   location.reload();
 }
-
 function setPage(p){
   document.querySelectorAll(".page").forEach(x => x.classList.remove("active"));
   const page = el(p + "Page");
