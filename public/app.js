@@ -437,11 +437,58 @@ async function uploadHomework(){
   const d = await r.json();
 
   if(d.error){
-    out.textContent = d.error;
-    return;
-  }
+  out.textContent = d.error;
+  return;
+}
 
-  out.textContent = d.message || "Homework uploaded successfully!";
+const txt = d.message || "";
+
+const get = (heading) => {
+  const match = txt.match(
+    new RegExp(heading + ":\\s*([\\s\\S]*?)(?=SCORE:|STRENGTHS:|IMPROVEMENTS:|REVISION:|NEXT_STEPS:|$)")
+  );
+  return match ? match[1].trim() : "";
+};
+
+out.innerHTML = `
+<div class="feedback-card">
+
+<h2>📄 Homework Assessment</h2>
+
+<div class="score-box">
+<h1>⭐ ${get("SCORE")}</h1>
+</div>
+
+<div class="feedback-section">
+<h3>✅ Strengths</h3>
+<ul>
+${get("STRENGTHS").split("\n").map(x=>`<li>${x.replace("-","").trim()}</li>`).join("")}
+</ul>
+</div>
+
+<div class="feedback-section">
+<h3>⚠️ Improvements</h3>
+<ul>
+${get("IMPROVEMENTS").split("\n").map(x=>`<li>${x.replace("-","").trim()}</li>`).join("")}
+</ul>
+</div>
+
+<div class="feedback-section">
+<h3>📚 Revision</h3>
+<ul>
+${get("REVISION").split("\n").map(x=>`<li>${x.replace("-","").trim()}</li>`).join("")}
+</ul>
+</div>
+
+<div class="feedback-section">
+<h3>🎯 Next Steps</h3>
+<ul>
+${get("NEXT_STEPS").split("\n").map(x=>`<li>${x.replace("-","").trim()}</li>`).join("")}
+</ul>
+</div>
+
+</div>
+`;
   
 }
 
