@@ -45,3 +45,6 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
 .footer-copy{
     color:#9ca3af;
 }
+.app:not(.hidden) ~ .site-footer {
+  display: none;
+}
