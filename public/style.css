@@ -245,3 +245,32 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
   grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   gap:20px;
 }
+.profile-hero{
+  background:linear-gradient(135deg,#182235,#0f172a);
+  border:1px solid #334155;
+  border-radius:28px;
+  padding:34px;
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  align-items:center;
+  margin-bottom:24px;
+}
+
+.profile-hero h1{
+  margin:6px 0;
+  font-size:36px;
+}
+
+.profile-level{
+  background:#111827;
+  border:1px solid #334155;
+  border-radius:22px;
+  padding:22px;
+  min-width:160px;
+  text-align:center;
+}
+
+.profile-level h2{
+  margin:0;
+}
