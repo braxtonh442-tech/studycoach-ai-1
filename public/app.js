@@ -354,7 +354,64 @@ async function loadProgress(){
       <div>${badges}</div>`;
   }
 }
+async function loadProfile() {
+  setPage("profile");
 
+  const d = await get("/api/profile");
+
+  if (d.error) {
+    el("profileOut").innerHTML =
+      `<p>${escapeHtml(d.error)}</p>`;
+    return;
+  }
+
+  const p = d.profile || {};
+
+  el("profileOut").innerHTML = `
+    <div class="profile-grid">
+
+      <div class="panel">
+        <h2>👤 Student Profile</h2>
+
+        <p><b>Name:</b> ${escapeHtml(p.name || currentUser?.name || "Unknown")}</p>
+        <p><b>Year Level:</b> ${escapeHtml(p.year_level || currentUser?.yearLevel || "-")}</p>
+        <p><b>Country:</b> ${escapeHtml(p.country || currentUser?.country || "-")}</p>
+      </div>
+
+      <div class="panel">
+        <h2>⭐ Progress</h2>
+
+        <p><b>Level:</b> ${d.level || 1}</p>
+        <p><b>Total XP:</b> ${d.xp || 0}</p>
+      </div>
+
+      <div class="panel">
+        <h2>📚 Learning</h2>
+
+        <p><b>Favourite Subject:</b> ${escapeHtml(p.favourite_subject || "Not learned yet")}</p>
+
+        <p><b>Weak Subject:</b> ${escapeHtml(p.weak_subject || "Not learned yet")}</p>
+
+        <p><b>Weak Topics:</b> ${escapeHtml(p.weak_topics || "None yet")}</p>
+
+        <p><b>Recently Learned:</b> ${escapeHtml(p.recently_learned || "Nothing yet")}</p>
+      </div>
+
+      <div class="panel">
+        <h2>🧠 AI Brain</h2>
+
+        <p><b>Learning Style:</b> ${escapeHtml(p.learning_style || "Unknown")}</p>
+
+        <p><b>Goals:</b> ${escapeHtml(p.goals || "No goals yet")}</p>
+
+        <p><b>AI Notes:</b></p>
+
+        <p>${escapeHtml(p.memory_notes || "The AI is still learning about you.")}</p>
+      </div>
+
+    </div>
+  `;
+}
 async function loadParent(){
   if(!requirePremium("Parent dashboard")) return;
   
