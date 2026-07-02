@@ -654,6 +654,7 @@ document.addEventListener("DOMContentLoaded", () => {
   on("navPlan", () => setPage("plan"));
   on("navTools", () => setPage("tools"));
   on("navProgress", loadProgress);
+  on("navProfile", loadProfile);
   on("navParent", loadParent);
   on("navTeacher", () => setPage("teacher"));
   on("navPricing", () => setPage("pricing"));
