@@ -340,55 +340,63 @@ async function loadProfile() {
   const d = await get("/api/profile");
 
   if (d.error) {
-    el("profileOut").innerHTML =
-      `<p>${escapeHtml(d.error)}</p>`;
+    el("profileOut").innerHTML = `<p>${escapeHtml(d.error)}</p>`;
     return;
   }
 
   const p = d.profile || {};
+  const xp = d.xp || 0;
+  const level = d.level || 1;
+  const nextLevelXp = level * 100;
+  const xpPercent = Math.min(100, Math.round((xp / nextLevelXp) * 100));
 
   el("profileOut").innerHTML = `
+    <div class="profile-hero">
+      <div>
+        <p class="eyebrow">AI Student Memory</p>
+        <h1>🧠 ${escapeHtml(p.name || currentUser?.name || "Student")}</h1>
+        <p>${escapeHtml(p.year_level || currentUser?.yearLevel || "Year level")} • ${escapeHtml(p.country || currentUser?.country || "New Zealand")}</p>
+      </div>
+      <div class="profile-level">
+        <h2>⭐ Level ${level}</h2>
+        <p>${xp} XP</p>
+      </div>
+    </div>
+
+    <div class="level-card">
+      <p class="eyebrow">Progress to Level ${level + 1}</p>
+      <div class="progress-track">
+        <div class="progress-fill" style="width:${xpPercent}%"></div>
+      </div>
+      <p><b>${xp}</b> / ${nextLevelXp} XP</p>
+    </div>
+
     <div class="profile-grid">
-
       <div class="panel">
-        <h2>👤 Student Profile</h2>
-
-        <p><b>Name:</b> ${escapeHtml(p.name || currentUser?.name || "Unknown")}</p>
-        <p><b>Year Level:</b> ${escapeHtml(p.year_level || currentUser?.yearLevel || "-")}</p>
-        <p><b>Country:</b> ${escapeHtml(p.country || currentUser?.country || "-")}</p>
-      </div>
-
-      <div class="panel">
-        <h2>⭐ Progress</h2>
-
-        <p><b>Level:</b> ${d.level || 1}</p>
-        <p><b>Total XP:</b> ${d.xp || 0}</p>
-      </div>
-
-      <div class="panel">
-        <h2>📚 Learning</h2>
-
+        <h3>📚 Learning Profile</h3>
         <p><b>Favourite Subject:</b> ${escapeHtml(p.favourite_subject || "Not learned yet")}</p>
-
         <p><b>Weak Subject:</b> ${escapeHtml(p.weak_subject || "Not learned yet")}</p>
-
         <p><b>Weak Topics:</b> ${escapeHtml(p.weak_topics || "None yet")}</p>
-
         <p><b>Recently Learned:</b> ${escapeHtml(p.recently_learned || "Nothing yet")}</p>
       </div>
 
       <div class="panel">
-        <h2>🧠 AI Brain</h2>
-
-        <p><b>Learning Style:</b> ${escapeHtml(p.learning_style || "Unknown")}</p>
-
-        <p><b>Goals:</b> ${escapeHtml(p.goals || "No goals yet")}</p>
-
-        <p><b>AI Notes:</b></p>
-
-        <p>${escapeHtml(p.memory_notes || "The AI is still learning about you.")}</p>
+        <h3>🧠 AI Brain</h3>
+        <p><b>Learning Style:</b> ${escapeHtml(p.learning_style || "Still learning")}</p>
+        <p><b>Memory Notes:</b></p>
+        <p>${escapeHtml(p.memory_notes || "The AI is still learning about this student.")}</p>
       </div>
 
+      <div class="panel">
+        <h3>🎯 Goals</h3>
+        <p>${escapeHtml(p.goals || "Build strong study habits")}</p>
+      </div>
+
+      <div class="panel">
+        <h3>📊 Scores</h3>
+        <p><b>Homework Average:</b> ${p.homework_average || 0}/10</p>
+        <p><b>Quiz Average:</b> ${p.quiz_average || 0}/10</p>
+      </div>
     </div>
   `;
 }
