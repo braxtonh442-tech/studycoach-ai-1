@@ -1,28 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>StudyCoach AI Final</title>
-  <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-
-<!-- keep all your existing marketing/auth/app content the same -->
-
-<!-- In the sidebar, use this order -->
-<button id="navProgress">Progress</button>
-<button id="navProfile">🧠 My AI Profile</button>
-<button id="navParent">Parent View</button>
-
-<!-- Add this page after progressPage -->
-<section id="profilePage" class="page">
-  <h2>🧠 My AI Profile</h2>
-  <div id="profileOut" class="panel"></div>
-</section>
-
+can you re makes this or nah <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>StudyCoach AI Final</title><link rel="stylesheet" href="/style.css"></head><body>
+<div id="marketing" class="marketing"><nav><div class="brand"><div class="logo">S</div><b>StudyCoach AI</b><span>Final</span></div><div class="navlinks"><button class="plain" id="loginTop">Login</button><button id="startTop">Start free</button></div></nav><section class="hero"><div class="pill">AI tutor • homework upload • voice input • memory • dashboards</div><h1>Your personal AI study coach.</h1><p>AI tutoring, quizzes, flashcards, study plans, parent progress, teacher view, voice input and homework upload.</p><div class="cta"><button id="startHero">Start free</button><button class="secondary" id="pricingBtn">See pricing</button></div></section><section class="features"><div><h3>AI Tutor</h3><p>Step-by-step explanations with practice questions.</p></div><div><h3>Homework Upload</h3><p>Upload homework and track it in progress.</p></div><div><h3>Voice Input</h3><p>Speak questions in Chrome.</p></div><div><h3>Memory</h3><p>Tracks weak areas and recent learning.</p></div></section><section id="pricing" class="pricing"><h2>Pricing</h2><div class="pricegrid"><div class="price"><h3>Free</h3><b>$0</b><p>Basic study tools.</p><button id="startFreePrice">Start</button></div><div class="price hot"><h3>Premium</h3><b>$14.99/mo</b><p>Unlimited tutor, parent view, upload, streaks and plans.</p><button id="premiumPrice">Try premium</button></div><div class="price"><h3>School</h3><b>Custom</b><p>Teacher dashboard and class tools.</p><button id="contactBtn">Contact</button></div></div></section></div>
+<div id="auth" class="auth hidden"><div class="authcard"><div class="logo big">S</div><h2 id="authTitle">Create account</h2><input id="name" placeholder="Student name"><input id="email" placeholder="Email"><input id="password" type="password" placeholder="Password, at least 6 letters"><div class="twocol"><select id="country"><option>New Zealand</option><option>Australia</option><option>United Kingdom</option><option>United States</option></select><select id="yearLevel"></select></div><button id="authBtn">Create account</button><button class="plain dark" id="switchAuth">Switch login/signup</button><button class="plain dark" id="backHome">Back</button><p id="authMsg"></p></div></div>
+<div id="app" class="app hidden"><aside><div class="brand side"><div class="logo">S</div><b>StudyCoach AI</b></div><button id="newChat" class="new">+ New chat</button><button id="navDashboard">Dashboard</button><button id="navChat">AI Tutor</button><button id="navUpload">Homework Upload</button><button id="navPlan">Study Plan</button><button id="navTools">Quiz & Flashcards</button><button id="navProgress">Progress</button><button id="navParent">Parent View</button><button id="navTeacher">Teacher View</button><button id="navPricing">Subscription</button><button id="navDebug">Debug</button><h4>Recent chats</h4><div id="history"></div><div class="logout"><button id="logoutBtn">Logout</button></div></aside><main><header><div><b id="hello">StudyCoach</b><span id="planText">Free plan</span></div><div class="selectors"><select id="appYear"></select><select id="subject"><option>Maths</option><option>English</option><option>Science</option><option>History</option><option>Geography</option><option>Business Studies</option></select></div></header>
+<section id="dashboardPage" class="page active"><div class="welcome"><h1 id="dashTitle">Welcome back</h1><p>Today's goal: 20 minutes of focused study.</p></div><div class="stats"><div class="stat"><b id="dashTasks">0</b><span>Tasks</span></div><div class="stat"><b id="dashStreak">0</b><span>Day streak</span></div><div class="stat"><b id="dashBadges">0</b><span>Badges</span></div><div class="stat"><b id="dashWeak">—</b><span>Focus area</span></div></div><div class="panel"><h3>Quick start</h3><div class="quick"><button data-prompt="Explain fractions for my year level">Explain fractions</button><button data-prompt="Quiz me on photosynthesis">Quiz photosynthesis</button><button data-prompt="Help me write an essay introduction">Essay help</button><button id="quickPlan">Make study plan</button></div></div></section>
+<section id="chatPage" class="page"><div id="messages" class="messages"><div class="empty"><div class="logo big">S</div><h2>What do you need help with?</h2><div class="suggestions"><button data-prompt="Explain fractions for my year level">Explain fractions</button><button data-prompt="Quiz me on photosynthesis">Quiz photosynthesis</button><button data-prompt="Help me write an essay introduction">Essay intro</button><button data-prompt="Make a 7 day study plan for my test">Study plan</button></div></div></div><div class="composer"><button id="voiceBtn">🎤</button><textarea id="message" placeholder="Message StudyCoach AI..."></textarea><button id="sendBtn">↑</button></div></section>
+<section id="uploadPage" class="page"><h2>Homework Upload</h2><div class="panel"><p>Upload a homework photo or file. Real image reading can be connected next.</p><input type="file" id="homeworkFile" accept="image/*,.pdf"><input id="homeworkNote" placeholder="What do you need help with?"><button id="uploadBtn">Upload homework</button><div id="uploadOut" class="output"></div></div></section>
+<section id="planPage" class="page"><h2>Study Plan</h2><div class="panel"><input id="planGoal" placeholder="Goal, e.g. maths test next Friday"><select id="planDays"><option>7</option><option>5</option><option>10</option><option>14</option></select><button id="makePlan">Build plan</button><div id="planOut" class="output"></div></div></section>
+<section id="toolsPage" class="page"><h2>Quiz & Flashcards</h2><div class="toolgrid"><div class="panel"><h3>Quiz maker</h3><input id="quizTopic" placeholder="Topic"><button id="makeQuiz">Make quiz</button><div id="quizOut" class="output"></div></div><div class="panel"><h3>Flashcards</h3><input id="flashTopic" placeholder="Topic"><button id="makeFlash">Make flashcards</button><div id="flashOut" class="output"></div></div></div></section>
+<section id="progressPage" class="page"><h2>Progress</h2><div id="progressOut" class="panel"></div></section><section id="parentPage" class="page"><h2>Parent View</h2><div id="parentOut" class="panel"></div></section><section id="teacherPage" class="page"><h2>Teacher View</h2><div class="panel"><button id="loadTeacher">Load class summary</button><div id="teacherOut" class="output"></div></div></section><section id="pricingPage" class="page"><h2>Subscription</h2><div class="pricegrid"><div class="price"><h3>Free</h3><b>$0</b><p>Demo and basic features.</p></div><div class="price hot"><h3>Premium</h3><b>NZ$14.99/mo</b><p>Pay securely with Stripe Checkout.</p><button id="stripeUpgrade">Upgrade with Stripe</button></div></div></section><section id="debugPage" class="page"><h2>Debug</h2><div class="panel"><button id="runDebug">Run debug check</button><div id="debugOut" class="output"></div></div></section></main></div><footer style="text-align:center;padding:30px;">
 <footer class="site-footer">
   <div class="footer-inner">
+
     <div class="footer-brand">
       <h3>StudyCoach AI</h3>
       <p>Your personal AI study coach.</p>
@@ -38,9 +26,10 @@
     <div class="footer-copy">
       © 2026 StudyCoach AI
     </div>
+
   </div>
 </footer>
 
-<script src="/app.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>
