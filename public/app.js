@@ -287,11 +287,11 @@ const dailyCoach = profileData.dailyCoach || "Keep going — complete one study 
       </div>
 
       <div class="panel">
-        <h3>🧠 AI Coach</h3>
-        <p><b>Favourite subject:</b> ${escapeHtml(favourite)}</p>
-        <p><b>Focus area:</b> ${escapeHtml(focus)}</p>
-        <p>Keep building your streak and aim for Level ${level + 1}.</p>
-      </div>
+  <h3>🤖 AI Daily Coach</h3>
+
+  <pre class="coach-text">${escapeHtml(dailyCoach)}</pre>
+
+</div>
 
       <div class="panel">
         <h3>🏆 Achievements</h3>
