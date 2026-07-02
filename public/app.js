@@ -227,7 +227,8 @@ async function loadDashboard(){
   if(!token) return;
 
   const d = await get("/api/progress");
-
+ const profileData = await get("/api/profile");
+const dailyCoach = profileData.dailyCoach || "Keep going — complete one study task today!";
   const hours = Math.round((d.estimatedStudyMinutes || 0) / 60);
   const progress = d.progressPercent || 0;
   const name = currentUser?.name || "student";
