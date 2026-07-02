@@ -225,116 +225,96 @@ async function openHistoryChat(id){
 
 async function loadDashboard(){
   if(!token) return;
+
   const d = await get("/api/progress");
 
   const hours = Math.round((d.estimatedStudyMinutes || 0) / 60);
   const progress = d.progressPercent || 0;
-  const badges = d.badges || [];
   const name = currentUser?.name || "student";
+
   const xp = d.xp || 0;
-const level = d.level || 1;
-const nextLevelXp = level * 100;
-const currentLevelStart = (level - 1) * 100;
-const xpIntoLevel = xp - currentLevelStart;
-const xpNeeded = nextLevelXp - currentLevelStart;
-const xpPercent = Math.min(100, Math.round((xpIntoLevel / xpNeeded) * 100));
+  const level = d.level || 1;
+  const nextLevelXp = level * 100;
+  const currentLevelStart = (level - 1) * 100;
+  const xpIntoLevel = xp - currentLevelStart;
+  const xpNeeded = nextLevelXp - currentLevelStart;
+  const xpPercent = Math.min(100, Math.round((xpIntoLevel / xpNeeded) * 100));
+
+  const achievements = d.achievements || [];
+  const favourite = d.favouriteSubject || "Not learned yet";
+  const focus = (d.weakAreas || [])[0] || "Build consistency";
+
   const dash = el("dashboardPage");
   if(!dash) return;
 
   dash.innerHTML = `
-    <div class="dash-hero">
+    <div class="premium-hero">
       <div>
-        <p class="eyebrow">StudyCoach AI Dashboard</p>
+        <p class="eyebrow">StudyCoach AI</p>
         <h1>Welcome back, ${escapeHtml(name)} 👋</h1>
-        <p>Your goal today: 20 minutes of focused study.</p>
+        <p>Your personal AI tutor is ready for today's study.</p>
       </div>
       <button onclick="newChat()">Start studying</button>
     </div>
 
+    <div class="level-card">
+      <div>
+        <p class="eyebrow">Current Level</p>
+        <h2>⭐ Level ${level}</h2>
+        <p><b>${xp}</b> / ${nextLevelXp} XP to reach Level ${level + 1}</p>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width:${xpPercent}%"></div>
+      </div>
+    </div>
+
     <div class="pro-stats">
-      <div class="pro-card">
-        <span>🔥</span>
-        <b>${d.streak || 0}</b>
-        <p>Day streak</p>
-      </div>
-
-      <div class="pro-card">
-        <span>📚</span>
-        <b>${d.total || 0}</b>
-        <p>Study tasks</p>
-      </div>
-
-      <div class="pro-card">
-        <span>⏱️</span>
-        <b>${hours}h</b>
-        <p>Study time</p>
-      </div>
-
-     <div class="pro-card">
-  <span>⭐</span>
-  <b>${d.xp || 0}</b>
-  <p>Total XP</p>
-</div>
-
-<div class="pro-card">
-  <span>🏆</span>
-  <b>Level ${d.level || 1}</b>
-  <p>Your Level</p>
-</div>
-
-</div>
-
-<div class="dashboard-grid">
-  <div class="panel big-panel">
-    <h3>📈 Weekly progress</h3>
-
-    <div class="progress-track">
-      <div class="progress-fill" style="width:${progress}%"></div>
+      <div class="pro-card"><span>🔥</span><b>${d.streak || 0}</b><p>Day streak</p></div>
+      <div class="pro-card"><span>📚</span><b>${d.total || 0}</b><p>Study tasks</p></div>
+      <div class="pro-card"><span>⏱️</span><b>${hours}h</b><p>Study time</p></div>
+      <div class="pro-card"><span>🎯</span><b>${progress}%</b><p>Weekly goal</p></div>
     </div>
 
-    <p><b>${progress}%</b> toward this week's goal</p>
+    <div class="dashboard-grid">
+      <div class="panel big-panel">
+        <h3>🎯 Today's Mission</h3>
+        <div class="mission-list">
+          <div>☐ Ask the AI one study question</div>
+          <div>☐ Complete one quiz or flashcard set</div>
+          <div>☐ Study for 20 minutes</div>
+        </div>
+      </div>
 
-    <h3>⭐ Level ${level}</h3>
-
-    <div class="progress-track">
-      <div class="progress-fill" style="width:${xpPercent}%"></div>
-    </div>
-
-    <p><b>${xp}</b> / ${nextLevelXp} XP to reach Level ${level + 1}</p>
-
-    <p><b>Favourite subject:</b> ${escapeHtml(d.favouriteSubject || "None")}</p>
-
-    <p><b>Focus area:</b> ${escapeHtml((d.weakAreas || [])[0] || "None")}</p>
-  </div>
+      <div class="panel">
+        <h3>🧠 AI Coach</h3>
+        <p><b>Favourite subject:</b> ${escapeHtml(favourite)}</p>
+        <p><b>Focus area:</b> ${escapeHtml(focus)}</p>
+        <p>Keep building your streak and aim for Level ${level + 1}.</p>
+      </div>
 
       <div class="panel">
         <h3>🏆 Achievements</h3>
-
-<div class="badge-list">
-  ${(d.achievements || []).length
-    ? d.achievements.map(a =>
-        `<span class="badge">${escapeHtml(a)}</span>`
-      ).join("")
-    : "<p>No achievements unlocked yet.</p>"
-  }
-</div>
-
+        <div class="badge-list">
+          ${achievements.length
+            ? achievements.slice(0, 6).map(a => `<span class="badge">${escapeHtml(a)}</span>`).join("")
+            : "<p>No achievements unlocked yet.</p>"
+          }
+        </div>
       </div>
 
       <div class="panel">
-        <h3>⚡ Quick start</h3>
+        <h3>⚡ Quick Start</h3>
         <div class="quick">
           <button data-prompt="Explain fractions for my year level">Explain fractions</button>
           <button data-prompt="Quiz me on photosynthesis">Quiz photosynthesis</button>
           <button data-prompt="Help me write an essay introduction">Essay help</button>
-          <button onclick="setPage('plan')">Make study plan</button>
+          <button onclick="setPage('profile')">View AI profile</button>
         </div>
       </div>
     </div>
   `;
 
   wirePromptButtons();
-
 }
 
 async function loadProgress(){
