@@ -551,3 +551,35 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
     font-size:12px;
     color:#94a3b8;
 }
+.achievement-pop{
+  position:fixed;
+  top:24px;
+  right:24px;
+  z-index:9999;
+  animation:popIn .35s ease;
+}
+
+.achievement-box{
+  background:linear-gradient(135deg,#172033,#0f172a);
+  border:1px solid #71e6b3;
+  border-radius:22px;
+  padding:22px 26px;
+  box-shadow:0 20px 50px rgba(0,0,0,.35);
+  color:#f8fafc;
+  max-width:320px;
+}
+
+.achievement-box h2{
+  margin:0 0 8px;
+  color:#71e6b3;
+}
+
+.achievement-box p{
+  margin:0;
+  color:#cbd5e1;
+}
+
+@keyframes popIn{
+  from{opacity:0;transform:translateY(-12px) scale(.95);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
