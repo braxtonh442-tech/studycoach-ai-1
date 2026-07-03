@@ -505,3 +505,41 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
   background:#052e16;
   border:1px solid #16a34a;
 }
+.challenge-list{
+  display:grid;
+  gap:16px;
+  margin-top:18px;
+}
+
+.challenge-row{
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+  background:#111827;
+  border:1px solid #334155;
+  border-radius:18px;
+  padding:16px;
+}
+
+.challenge-row span{
+  font-size:30px;
+}
+
+.challenge-row p{
+  margin:6px 0;
+  color:#a7b0c0;
+}
+
+.challenge-track{
+  height:10px;
+  background:#0f172a;
+  border:1px solid #334155;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.challenge-fill{
+  height:100%;
+  background:linear-gradient(90deg,#facc15,#22c55e);
+  border-radius:999px;
+}
