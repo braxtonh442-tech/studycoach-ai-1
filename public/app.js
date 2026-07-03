@@ -528,13 +528,35 @@ function showQuizQuestion(){
   `;
 }
 
-function checkQuizAnswer(){
+async function checkQuizAnswer(){
   const answer = value("quizAnswer");
+  const q = currentQuiz[currentQuizIndex];
 
   if(!answer){
     el("quizFeedback").innerHTML = "<p>Please type an answer first.</p>";
     return;
   }
+
+  el("quizFeedback").innerHTML = "<p>Checking answer...</p>";
+
+  const d = await post("/api/check-quiz-answer", {
+    question: q,
+    answer,
+    subject: value("subject"),
+    yearLevel: value("appYear")
+  }, true);
+
+  if(d.error){
+    el("quizFeedback").innerHTML = `<p>${escapeHtml(d.error)}</p>`;
+    return;
+  }
+
+  el("quizFeedback").innerHTML = `
+    <div class="feedback-good">
+      ${escapeHtml(d.result)}
+    </div>
+  `;
+}
 
   el("quizFeedback").innerHTML = `
     <div class="feedback-good">
