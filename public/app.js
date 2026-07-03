@@ -297,7 +297,26 @@ async function loadDashboard(){
       </div>
 <div class="chart-panel">
   <h3>📈 Weekly Study Activity</h3>
+<div class="chart-panel">
+  <h3>📚 Subject Breakdown</h3>
 
+  <div class="subject-bars">
+    ${Object.entries(analytics.subjectData || {}).length
+      ? Object.entries(analytics.subjectData || {}).map(([subject, count]) => `
+        <div class="subject-row">
+          <div class="subject-top">
+            <b>${escapeHtml(subject)}</b>
+            <span>${count}</span>
+          </div>
+          <div class="subject-track">
+            <div class="subject-fill" style="width:${Math.min(100, count * 15)}%"></div>
+          </div>
+        </div>
+      `).join("")
+      : "<p>No subject data yet.</p>"
+    }
+  </div>
+</div>
   <div class="bar-chart">
     ${(analytics.weeklyStudy || [0,0,0,0,0,0,0]).map((v, i) => `
       <div class="bar-wrap">
