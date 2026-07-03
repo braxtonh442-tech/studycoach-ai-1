@@ -371,3 +371,28 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
   font-size:13px;
   opacity:.8;
 }
+.subject-bars{
+  display:grid;
+  gap:14px;
+  margin-top:18px;
+}
+
+.subject-top{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:6px;
+}
+
+.subject-track{
+  height:12px;
+  background:#0f172a;
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid #334155;
+}
+
+.subject-fill{
+  height:100%;
+  background:linear-gradient(90deg,#60a5fa,#a78bfa);
+  border-radius:999px;
+}
