@@ -480,8 +480,10 @@ async function makePlan(){
   await loadDashboard();
 }
 
-async function makeQuiz(){
+let currentQuiz = [];
+let currentQuizIndex = 0;
 
+async function makeQuiz(){
   const d = await post("/api/quiz",{
     topic: value("quizTopic"),
     subject: value("subject")
@@ -492,14 +494,71 @@ async function makeQuiz(){
     return;
   }
 
-  if(el("quizOut")){
-    el("quizOut").innerHTML = `
-      <h3>🧠 ${escapeHtml(d.quiz.topic)}</h3>
-      <ol>
-        ${d.quiz.questions.map(q => `<li>${escapeHtml(q)}</li>`).join("")}
-      </ol>
-    `;
+  currentQuiz = d.quiz.questions || [];
+  currentQuizIndex = 0;
+
+  showQuizQuestion();
+  await loadDashboard();
+}
+
+function showQuizQuestion(){
+  if(!el("quizOut")) return;
+
+  if(currentQuiz.length === 0){
+    el("quizOut").innerHTML = "<p>No quiz questions found.</p>";
+    return;
   }
+
+  const q = currentQuiz[currentQuizIndex];
+
+  el("quizOut").innerHTML = `
+    <div class="quiz-card">
+      <p class="eyebrow">Question ${currentQuizIndex + 1} of ${currentQuiz.length}</p>
+      <h2>${escapeHtml(q)}</h2>
+
+      <textarea id="quizAnswer" placeholder="Type your answer here..."></textarea>
+
+      <div class="quiz-actions">
+        <button onclick="checkQuizAnswer()">Check answer</button>
+        <button class="secondary" onclick="nextQuizQuestion()">Skip</button>
+      </div>
+
+      <div id="quizFeedback"></div>
+    </div>
+  `;
+}
+
+function checkQuizAnswer(){
+  const answer = value("quizAnswer");
+
+  if(!answer){
+    el("quizFeedback").innerHTML = "<p>Please type an answer first.</p>";
+    return;
+  }
+
+  el("quizFeedback").innerHTML = `
+    <div class="feedback-good">
+      ✅ Nice effort. Compare your answer with the question and ask the AI if you want help improving it.
+    </div>
+  `;
+}
+
+function nextQuizQuestion(){
+  currentQuizIndex++;
+
+  if(currentQuizIndex >= currentQuiz.length){
+    el("quizOut").innerHTML = `
+      <div class="quiz-card">
+        <h2>🎉 Quiz complete!</h2>
+        <p>You worked through ${currentQuiz.length} questions.</p>
+        <button onclick="makeQuiz()">Try again</button>
+      </div>
+    `;
+    return;
+  }
+
+  showQuizQuestion();
+}
 
   await loadDashboard();
 }
