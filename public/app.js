@@ -252,7 +252,30 @@ async function loadDashboard(){
   const xpPercent = Math.min(100, Math.round((xpIntoLevel / xpNeeded) * 100));
 
   const achievements = d.achievements || [];
+const chatCount = analytics.chatCount || 0;
+const quizAnswers = analytics.quizAnswerCount || 0;
+const homeworkCount = analytics.homeworkAverage || 0;
 
+const dailyChallenges = [
+  {
+    icon: "💬",
+    title: "Ask 3 AI questions",
+    progress: Math.min(3, chatCount),
+    target: 3
+  },
+  {
+    icon: "🧠",
+    title: "Answer 3 quiz questions",
+    progress: Math.min(3, quizAnswers),
+    target: 3
+  },
+  {
+    icon: "📄",
+    title: "Upload 1 homework task",
+    progress: Math.min(1, homeworkCount),
+    target: 1
+  }
+];
   const dash = el("dashboardPage");
   if(!dash) return;
 
