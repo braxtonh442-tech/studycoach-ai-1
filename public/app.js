@@ -560,9 +560,6 @@ function nextQuizQuestion(){
   showQuizQuestion();
 }
 
-  await loadDashboard();
-}
-
  
 async function makeFlash(){
   const d = await post("/api/flashcards", {
