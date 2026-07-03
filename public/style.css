@@ -401,6 +401,9 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
   border:1px solid #334155;
   border-radius:26px;
   padding:24px;
+
+  overflow-y:auto;
+  height:calc(100vh - 240px);
 }
 
 .msg{
