@@ -558,13 +558,6 @@ async function checkQuizAnswer(){
   `;
 }
 
-  el("quizFeedback").innerHTML = `
-    <div class="feedback-good">
-      ✅ Nice effort. Compare your answer with the question and ask the AI if you want help improving it.
-    </div>
-  `;
-}
-
 function nextQuizQuestion(){
   currentQuizIndex++;
 
