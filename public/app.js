@@ -333,55 +333,57 @@ const dailyChallenges = [
     `).join("")}
   </div>
 </div>
-      <div class="panel big-panel">
-        <h3>📊 Analytics</h3>
-        <div class="analytics-grid">
-          <div class="analytics-card"><span>📚</span><h2>${analytics.studyTasks || 0}</h2><p>Total Study Tasks</p></div>
-          <div class="analytics-card"><span>🧪</span><h2>${analytics.quizCount || 0}</h2><p>Quizzes Completed</p></div>
-          <div class="analytics-card"><span>📄</span><h2>${analytics.homeworkAverage || 0}</h2><p>Homework Uploaded</p></div>
-          <div class="analytics-card"><span>🃏</span><h2>${analytics.flashcardCount || 0}</h2><p>Flashcard Sessions</p></div>
-        </div>
-      </div>
-<div class="chart-panel">
-  <h3>📈 Weekly Study Activity</h3>
-<div class="chart-panel">
-  <h3>📚 Subject Breakdown</h3>
+     <div class="panel big-panel">
+  <h3>📊 Analytics</h3>
 
-  <div class="subject-bars">
-    ${Object.entries(analytics.subjectData || {}).length
-      ? Object.entries(analytics.subjectData || {}).map(([subject, count]) => `
-        <div class="subject-row">
-          <div class="subject-top">
-            <b>${escapeHtml(subject)}</b>
-            <span>${count}</span>
-          </div>
-          <div class="subject-track">
-            <div class="subject-fill" style="width:${Math.min(100, count * 15)}%"></div>
-          </div>
-        </div>
-      `).join("")
-      : "<p>No subject data yet.</p>"
-    }
+  <div class="analytics-grid">
+    <div class="analytics-card"><span>📚</span><h2>${analytics.studyTasks || 0}</h2><p>Total Study Tasks</p></div>
+    <div class="analytics-card"><span>🧪</span><h2>${analytics.quizCount || 0}</h2><p>Quizzes Completed</p></div>
+    <div class="analytics-card"><span>📄</span><h2>${analytics.homeworkAverage || 0}</h2><p>Homework Uploaded</p></div>
+    <div class="analytics-card"><span>🃏</span><h2>${analytics.flashcardCount || 0}</h2><p>Flashcard Sessions</p></div>
   </div>
-</div>
- <div class="bar-chart">
-  ${(analytics.weeklyStudy || [0,0,0,0,0,0,0]).map(v => `
-    <div class="bar-wrap">
-      <div class="bar" style="height:${Math.max(8, v * 12)}px"></div>
-    </div>
-  `).join("")}
-</div>
 
-<div class="week-labels">
-  <span>Mon</span>
-  <span>Tue</span>
-  <span>Wed</span>
-  <span>Thu</span>
-  <span>Fri</span>
-  <span>Sat</span>
-  <span>Sun</span>
-</div>
-    `).join("")}
+  <div class="chart-panel">
+    <h3>📈 Weekly Study Activity</h3>
+
+    <div class="bar-chart">
+      ${(analytics.weeklyStudy || [0,0,0,0,0,0,0]).map(v => `
+        <div class="bar-wrap">
+          <div class="bar" style="height:${Math.max(8, v * 12)}px"></div>
+        </div>
+      `).join("")}
+    </div>
+
+    <div class="week-labels">
+      <span>Mon</span>
+      <span>Tue</span>
+      <span>Wed</span>
+      <span>Thu</span>
+      <span>Fri</span>
+      <span>Sat</span>
+      <span>Sun</span>
+    </div>
+  </div>
+
+  <div class="chart-panel">
+    <h3>📚 Subject Breakdown</h3>
+
+    <div class="subject-bars">
+      ${Object.entries(analytics.subjectData || {}).length
+        ? Object.entries(analytics.subjectData || {}).map(([subject, count]) => `
+          <div class="subject-row">
+            <div class="subject-top">
+              <b>${escapeHtml(subject)}</b>
+              <span>${count}</span>
+            </div>
+            <div class="subject-track">
+              <div class="subject-fill" style="width:${Math.min(100, count * 15)}%"></div>
+            </div>
+          </div>
+        `).join("")
+        : "<p>No subject data yet.</p>"
+      }
+    </div>
   </div>
 </div>
       <div class="panel">
