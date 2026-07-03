@@ -295,7 +295,18 @@ async function loadDashboard(){
           <div class="analytics-card"><span>🃏</span><h2>${analytics.flashcardCount || 0}</h2><p>Flashcard Sessions</p></div>
         </div>
       </div>
+<div class="chart-panel">
+  <h3>📈 Weekly Study Activity</h3>
 
+  <div class="bar-chart">
+    ${(analytics.weeklyStudy || [0,0,0,0,0,0,0]).map((v, i) => `
+      <div class="bar-wrap">
+        <div class="bar" style="height:${Math.max(8, v * 12)}px"></div>
+        <span>${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"][i]}</span>
+      </div>
+    `).join("")}
+  </div>
+</div>
       <div class="panel">
         <h3>🤖 AI Daily Coach</h3>
         <pre class="coach-text">${escapeHtml(dailyCoach)}</pre>
