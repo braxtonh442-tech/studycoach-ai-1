@@ -364,12 +364,23 @@ const dailyChallenges = [
     }
   </div>
 </div>
-  <div class="bar-chart">
-    ${(analytics.weeklyStudy || [0,0,0,0,0,0,0]).map((v, i) => `
-      <div class="bar-wrap">
-        <div class="bar" style="height:${Math.max(8, v * 12)}px"></div>
-        <span>${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"][i]}</span>
-      </div>
+ <div class="bar-chart">
+  ${(analytics.weeklyStudy || [0,0,0,0,0,0,0]).map(v => `
+    <div class="bar-wrap">
+      <div class="bar" style="height:${Math.max(8, v * 12)}px"></div>
+    </div>
+  `).join("")}
+</div>
+
+<div class="week-labels">
+  <span>Mon</span>
+  <span>Tue</span>
+  <span>Wed</span>
+  <span>Thu</span>
+  <span>Fri</span>
+  <span>Sat</span>
+  <span>Sun</span>
+</div>
     `).join("")}
   </div>
 </div>
