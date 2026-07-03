@@ -829,7 +829,26 @@ async function get(url){
     return { error: "Network/server error: " + e.message };
   }
 }
+function showAchievement(title, message){
+  const old = document.querySelector(".achievement-pop");
+  if(old) old.remove();
 
+  const pop = document.createElement("div");
+  pop.className = "achievement-pop";
+
+  pop.innerHTML = `
+    <div class="achievement-box">
+      <h2>${escapeHtml(title)}</h2>
+      <p>${escapeHtml(message)}</p>
+    </div>
+  `;
+
+  document.body.appendChild(pop);
+
+  setTimeout(() => {
+    pop.remove();
+  }, 3500);
+}
 function wirePromptButtons(){
   document.querySelectorAll("[data-prompt]").forEach(btn => {
     btn.onclick = () => promptSend(btn.getAttribute("data-prompt"));
