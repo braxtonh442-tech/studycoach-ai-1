@@ -227,9 +227,11 @@ async function loadDashboard(){
   if(!token) return;
 
   const d = await get("/api/progress");
+  const profileData = await get("/api/profile");
+
   const analytics = d.analytics || {};
- const profileData = await get("/api/profile");
-const dailyCoach = profileData.dailyCoach || "Keep going — complete one study task today!";
+  const dailyCoach = profileData.dailyCoach || "Keep going — complete one study task today!";
+
   const hours = Math.round((d.estimatedStudyMinutes || 0) / 60);
   const progress = d.progressPercent || 0;
   const name = currentUser?.name || "student";
@@ -243,8 +245,6 @@ const dailyCoach = profileData.dailyCoach || "Keep going — complete one study 
   const xpPercent = Math.min(100, Math.round((xpIntoLevel / xpNeeded) * 100));
 
   const achievements = d.achievements || [];
-  const favourite = d.favouriteSubject || "Not learned yet";
-  const focus = (d.weakAreas || [])[0] || "Build consistency";
 
   const dash = el("dashboardPage");
   if(!dash) return;
@@ -260,11 +260,9 @@ const dailyCoach = profileData.dailyCoach || "Keep going — complete one study 
     </div>
 
     <div class="level-card">
-      <div>
-        <p class="eyebrow">Current Level</p>
-        <h2>⭐ Level ${level}</h2>
-        <p><b>${xp}</b> / ${nextLevelXp} XP to reach Level ${level + 1}</p>
-      </div>
+      <p class="eyebrow">Current Level</p>
+      <h2>⭐ Level ${level}</h2>
+      <p><b>${xp}</b> / ${nextLevelXp} XP to reach Level ${level + 1}</p>
       <div class="progress-track">
         <div class="progress-fill" style="width:${xpPercent}%"></div>
       </div>
@@ -278,6 +276,7 @@ const dailyCoach = profileData.dailyCoach || "Keep going — complete one study 
     </div>
 
     <div class="dashboard-grid">
+
       <div class="panel big-panel">
         <h3>🎯 Today's Mission</h3>
         <div class="mission-list">
@@ -287,12 +286,20 @@ const dailyCoach = profileData.dailyCoach || "Keep going — complete one study 
         </div>
       </div>
 
+      <div class="panel big-panel">
+        <h3>📊 Analytics</h3>
+        <div class="analytics-grid">
+          <div class="analytics-card"><span>📚</span><h2>${analytics.studyTasks || 0}</h2><p>Total Study Tasks</p></div>
+          <div class="analytics-card"><span>🧪</span><h2>${analytics.quizCount || 0}</h2><p>Quizzes Completed</p></div>
+          <div class="analytics-card"><span>📄</span><h2>${analytics.homeworkAverage || 0}</h2><p>Homework Uploaded</p></div>
+          <div class="analytics-card"><span>🃏</span><h2>${analytics.flashcardCount || 0}</h2><p>Flashcard Sessions</p></div>
+        </div>
+      </div>
+
       <div class="panel">
-  <h3>🤖 AI Daily Coach</h3>
-
-  <pre class="coach-text">${escapeHtml(dailyCoach)}</pre>
-
-</div>
+        <h3>🤖 AI Daily Coach</h3>
+        <pre class="coach-text">${escapeHtml(dailyCoach)}</pre>
+      </div>
 
       <div class="panel">
         <h3>🏆 Achievements</h3>
@@ -313,12 +320,12 @@ const dailyCoach = profileData.dailyCoach || "Keep going — complete one study 
           <button onclick="setPage('profile')">View AI profile</button>
         </div>
       </div>
+
     </div>
   `;
 
   wirePromptButtons();
 }
-
 async function loadProgress(){
   setPage("progress");
   const d = await get("/api/progress");
