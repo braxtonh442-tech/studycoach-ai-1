@@ -127,7 +127,12 @@ function newChat(){
     el("messages").innerHTML = `
       <div class="empty">
         <div class="logo big">S</div>
-        <h2>What do you need help with?</h2>
+        <h2>👋 Welcome to StudyCoach AI</h2>
+
+<p style="opacity:.8;margin-top:8px;">
+Ask anything about school, upload homework,
+create quizzes or build study plans.
+</p>
         <div class="suggestions">
           <button data-prompt="Explain fractions for my year level">Explain fractions</button>
           <button data-prompt="Quiz me on photosynthesis">Quiz photosynthesis</button>
@@ -152,7 +157,7 @@ async function send(){
   document.querySelector(".empty")?.remove();
 
   addMsg("user", m);
-  const wait = addMsg("bot", "Thinking...");
+ const wait = addMsg("bot", "🟢 StudyCoach AI is thinking...");
 
   const d = await post("/api/chat", {
     message: m,
@@ -175,7 +180,9 @@ function addMsg(role, text){
   div.className = "msg " + (role === "user" ? "user" : "bot");
   div.innerHTML = `
     <div class="inner">
-      <div class="avatar">${role === "user" ? "U" : "S"}</div>
+    <div class="avatar">
+  ${role === "user" ? "👤" : "🤖"}
+</div>
       <div class="text">${escapeHtml(text)}</div>
     </div>`;
 
