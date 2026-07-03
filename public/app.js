@@ -315,7 +315,24 @@ const dailyChallenges = [
           <div>☐ Study for 20 minutes</div>
         </div>
       </div>
+<div class="panel big-panel">
+  <h3>🏆 Daily Challenges</h3>
 
+  <div class="challenge-list">
+    ${dailyChallenges.map(c => `
+      <div class="challenge-row">
+        <span>${c.icon}</span>
+        <div>
+          <b>${c.title}</b>
+          <p>${c.progress} / ${c.target} complete</p>
+          <div class="challenge-track">
+            <div class="challenge-fill" style="width:${Math.round((c.progress / c.target) * 100)}%"></div>
+          </div>
+        </div>
+      </div>
+    `).join("")}
+  </div>
+</div>
       <div class="panel big-panel">
         <h3>📊 Analytics</h3>
         <div class="analytics-grid">
