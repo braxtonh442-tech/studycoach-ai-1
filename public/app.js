@@ -556,6 +556,8 @@ async function checkQuizAnswer(){
       ${escapeHtml(d.result)}
     </div>
   `;
+  await loadDashboard();
+await loadProfile();
 }
 
 function nextQuizQuestion(){
