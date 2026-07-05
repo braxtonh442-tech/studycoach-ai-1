@@ -552,9 +552,19 @@ const allAchievements = [
     </div>
     
 <div class="panel">
-  <h3>🔥 Study Streak Calendar</h3>
+ <h3>🔥 Study Streak Calendar</h3>
 
-  <div class="streak-calendar">
+<div class="streak-weekdays">
+  <span>Mon</span>
+  <span>Tue</span>
+  <span>Wed</span>
+  <span>Thu</span>
+  <span>Fri</span>
+  <span>Sat</span>
+  <span>Sun</span>
+</div>
+
+<div class="streak-calendar">
     ${calendarDays.map(d => `
     <div class="streak-day ${d.studied ? "studied" : ""} ${d.isToday ? "today" : ""}" title="${d.dateKey}">
   ${d.day}
