@@ -437,7 +437,8 @@ async function loadProfile() {
   setPage("profile");
 
   const d = await get("/api/profile");
-
+const achievementData = await get("/api/achievements");
+const earnedAchievements = achievementData.achievements || [];
   if (d.error) {
     el("profileOut").innerHTML = `<p>${escapeHtml(d.error)}</p>`;
     return;
