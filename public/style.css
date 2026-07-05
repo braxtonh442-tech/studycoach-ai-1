@@ -656,3 +656,6 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
 .streak-day:hover{
   transform:scale(1.05);
 }
+<div class="streak-day ${d.studied ? "studied" : ""} ${d.isToday ? "today" : ""}" title="${d.dateKey}">
+  ${d.day}
+</div>
