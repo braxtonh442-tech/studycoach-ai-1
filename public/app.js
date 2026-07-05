@@ -546,6 +546,18 @@ for(let i = 27; i >= 0; i--){
         <p><b>Quiz Average:</b> ${p.quiz_average || 0}/10</p>
       </div>
     </div>
+    
+<div class="panel">
+  <h3>🔥 Study Streak Calendar</h3>
+
+  <div class="streak-calendar">
+    ${calendarDays.map(d => `
+      <div class="streak-day ${d.studied ? "studied" : ""}">
+        ${d.day}
+      </div>
+    `).join("")}
+  </div>
+</div>
 
   <div class="panel">
   <h3>🏆 Achievement Gallery</h3>
