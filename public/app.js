@@ -609,8 +609,8 @@ async function checkQuizAnswer(){
       ${escapeHtml(d.result)}
     </div>
   `;
-  await loadDashboard();
-await loadProfile();
+ await loadDashboard();
+setPage("tools");
 
 showAchievement(
   "🎉 +10 XP Earned!",
