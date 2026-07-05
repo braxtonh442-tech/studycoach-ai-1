@@ -82,37 +82,35 @@ async function authAction(){
   showApp();
 }
 
-async function showApp(){
+async function showApp() {
   const loading = el("loadingScreen");
   const fill = el("loadingFill");
 
-  if(loading) loading.classList.remove("hidden");
-  if(fill) fill.style.width = "15%";
+  try {
+    if (loading) loading.classList.remove("hidden");
+    if (fill) fill.style.width = "20%";
 
-  el("marketing")?.classList.add("hidden");
-  el("auth")?.classList.add("hidden");
-  el("app")?.classList.remove("hidden");
+    el("marketing")?.classList.add("hidden");
+    el("auth")?.classList.add("hidden");
+    el("app")?.classList.remove("hidden");
 
-  if(fill) fill.style.width = "45%";
+    if (fill) fill.style.width = "50%";
 
-  await loadMe();
+    await loadMe();
 
-  if(fill) fill.style.width = "70%";
+    if (fill) fill.style.width = "70%";
 
-  await loadHistory();
-  await loadDashboard();
+    await loadHistory();
+    await loadDashboard();
 
-  if(fill) fill.style.width = "100%";
-
-  setTimeout(() => {
-    if(loading){
-      loading.style.opacity = "0";
-      setTimeout(() => {
-        loading.classList.add("hidden");
-        loading.style.opacity = "1";
-      }, 400);
-    }
-  }, 300);
+    if (fill) fill.style.width = "100%";
+  } catch (err) {
+    console.error("Loading error:", err);
+  } finally {
+    setTimeout(() => {
+      if (loading) loading.classList.add("hidden");
+    }, 300);
+  }
 }
 
 
