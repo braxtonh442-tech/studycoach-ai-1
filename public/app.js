@@ -443,17 +443,20 @@ const achievementData = await get("/api/achievements");
 const earnedAchievements = achievementData.achievements || [];
  const today = new Date();
 const calendarDays = [];
-
+const todayKey = today.toISOString().slice(0, 10);
+  
 for (let i = 27; i >= 0; i--) {
   const d = new Date(today);
   d.setDate(today.getDate() - i);
 
   const dateKey = d.toISOString().slice(0, 10);
 
-  calendarDays.push({
-    day: d.getDate(),
-    studied: studyDates.includes(dateKey)
-  });
+ calendarDays.push({
+  day: d.getDate(),
+  dateKey,
+  studied: studyDates.includes(dateKey),
+  isToday: dateKey === todayKey
+});
 }
 const allAchievements = [
   {
