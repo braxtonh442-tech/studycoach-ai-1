@@ -441,7 +441,6 @@ async function loadProfile() {
 const studyDates = progressData.studyDates || [];
 const achievementData = await get("/api/achievements");
 const earnedAchievements = achievementData.achievements || [];
-  const allAchievements = [
   {
     const today = new Date();
 const calendarDays = [];
@@ -462,6 +461,7 @@ for(let i = 27; i >= 0; i--){
     title: "First AI Question",
     description: "Ask your first AI question."
   },
+  const allAchievements = [
   {
     key: "first-quiz-answer",
     icon: "🧠",
