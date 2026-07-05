@@ -556,9 +556,9 @@ const allAchievements = [
 
   <div class="streak-calendar">
     ${calendarDays.map(d => `
-      <div class="streak-day ${d.studied ? "studied" : ""}">
-        ${d.day}
-      </div>
+    <div class="streak-day ${d.studied ? "studied" : ""} ${d.isToday ? "today" : ""}" title="${d.dateKey}">
+  ${d.day}
+</div>
     `).join("")}
   </div>
 </div>
