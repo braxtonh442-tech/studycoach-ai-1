@@ -437,6 +437,8 @@ async function loadProfile() {
   setPage("profile");
 
   const d = await get("/api/profile");
+  const progressData = await get("/api/progress");
+const studyDates = progressData.studyDates || [];
 const achievementData = await get("/api/achievements");
 const earnedAchievements = achievementData.achievements || [];
   const allAchievements = [
