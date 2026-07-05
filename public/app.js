@@ -438,6 +438,8 @@ async function loadProfile() {
 
   const d = await get("/api/profile");
   const progressData = await get("/api/progress");
+  const currentStreak = progressData.currentStreak || 0;
+const bestStreak = progressData.bestStreak || 0;
 const studyDates = progressData.studyDates || [];
 const achievementData = await get("/api/achievements");
 const earnedAchievements = achievementData.achievements || [];
@@ -553,7 +555,17 @@ const allAchievements = [
     
 <div class="panel">
  <h3>🔥 Study Streak Calendar</h3>
+<div class="streak-stats">
+  <div class="streak-stat">
+    <h2>🔥 ${currentStreak}</h2>
+    <p>Current Streak</p>
+  </div>
 
+  <div class="streak-stat">
+    <h2>🏆 ${bestStreak}</h2>
+    <p>Best Streak</p>
+  </div>
+</div>
 <div class="streak-weekdays">
   <span>Mon</span>
   <span>Tue</span>
