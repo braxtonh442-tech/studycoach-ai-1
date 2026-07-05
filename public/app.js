@@ -86,16 +86,12 @@ async function showApp(){
   const loading = el("loadingScreen");
   const fill = el("loadingFill");
 
-  if(loading){
-    loading.classList.remove("hidden");
-  }
-
-  if(fill){
-    fill.style.width = "15%";
-  }
+  if(loading) loading.classList.remove("hidden");
+  if(fill) fill.style.width = "15%";
 
   el("marketing")?.classList.add("hidden");
   el("auth")?.classList.add("hidden");
+  el("app")?.classList.remove("hidden");
 
   if(fill) fill.style.width = "45%";
 
@@ -108,20 +104,16 @@ async function showApp(){
 
   if(fill) fill.style.width = "100%";
 
-// Show the app first
-el("app")?.classList.remove("hidden");
-
-// Then hide the loading screen
-setTimeout(() => {
-  if (loading) {
-    loading.style.opacity = "0";
-
-    setTimeout(() => {
-      loading.classList.add("hidden");
-      loading.style.opacity = "1";
-    }, 400);
-  }
-}, 100);
+  setTimeout(() => {
+    if(loading){
+      loading.style.opacity = "0";
+      setTimeout(() => {
+        loading.classList.add("hidden");
+        loading.style.opacity = "1";
+      }, 400);
+    }
+  }, 300);
+}
 }
 
 async function loadMe(){
