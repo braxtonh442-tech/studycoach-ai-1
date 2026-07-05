@@ -444,13 +444,18 @@ const studyDates = progressData.studyDates || [];
 const achievementData = await get("/api/achievements");
 const earnedAchievements = achievementData.achievements || [];
  const today = new Date();
+const today = new Date();
 const calendarDays = [];
-const todayKey = today.toISOString().slice(0, 10);
-  
-for (let i = 27; i >= 0; i--) {
-  const d = new Date(today);
-  d.setDate(today.getDate() - i);
 
+const startDate = new Date(today);
+const dayOfWeek = startDate.getDay(); // Sun=0, Mon=1
+const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+startDate.setDate(today.getDate() - mondayOffset - 21);
+
+for (let i = 0; i < 28; i++) {
+const d = new Date(startDate);
+d.setDate(startDate.getDate() + i);
   const dateKey = d.toISOString().slice(0, 10);
 
  calendarDays.push({
