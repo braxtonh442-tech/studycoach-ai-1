@@ -114,7 +114,7 @@ async function showApp(){
     }
   }, 300);
 }
-}
+
 
 async function loadMe(){
   if(!token) return;
