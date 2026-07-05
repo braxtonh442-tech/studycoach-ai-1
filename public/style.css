@@ -774,3 +774,11 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
   opacity:1;
   transition:opacity .4s ease;
 }
+.app{
+  opacity:0;
+  transition:opacity .4s ease;
+}
+
+.app.show{
+  opacity:1;
+}
