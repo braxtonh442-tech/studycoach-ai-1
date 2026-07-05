@@ -626,3 +626,33 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
   font-size:12px;
   font-weight:800;
 }
+.streak-calendar{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:10px;
+  margin-top:15px;
+}
+
+.streak-day{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  aspect-ratio:1;
+  border-radius:12px;
+  background:#1f2937;
+  border:1px solid #334155;
+  color:#cbd5e1;
+  font-weight:700;
+  transition:all .2s ease;
+}
+
+.streak-day.studied{
+  background:#22c55e;
+  border-color:#16a34a;
+  color:white;
+  box-shadow:0 0 12px rgba(34,197,94,.4);
+}
+
+.streak-day:hover{
+  transform:scale(1.05);
+}
