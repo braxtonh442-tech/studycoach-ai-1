@@ -443,6 +443,20 @@ const achievementData = await get("/api/achievements");
 const earnedAchievements = achievementData.achievements || [];
   const allAchievements = [
   {
+    const today = new Date();
+const calendarDays = [];
+
+for(let i = 27; i >= 0; i--){
+  const d = new Date(today);
+  d.setDate(today.getDate() - i);
+
+  const dateKey = d.toISOString().slice(0,10);
+
+  calendarDays.push({
+    day: d.getDate(),
+    studied: studyDates.includes(dateKey)
+  });
+}
     key: "first-ai-question",
     icon: "💬",
     title: "First AI Question",
