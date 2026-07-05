@@ -274,62 +274,45 @@ async function loadDashboard(){
   const xpNeeded = nextLevelXp - currentLevelStart;
   const xpPercent = Math.min(100, Math.round((xpIntoLevel / xpNeeded) * 100));
 
-  const achievements = d.achievements || [];
-const chatCount = analytics.chatCount || 0;
-const quizAnswers = analytics.quizAnswerCount || 0;
-const homeworkCount = analytics.homeworkAverage || 0;
+  const chatCount = analytics.chatCount || 0;
+  const quizAnswers = analytics.quizAnswerCount || 0;
+  const homeworkCount = analytics.homeworkAverage || 0;
 
-const dailyChallenges = [
-  {
-    icon: "💬",
-    title: "Ask 3 AI questions",
-    progress: Math.min(3, chatCount),
-    target: 3
-  },
-  {
-    icon: "🧠",
-    title: "Answer 3 quiz questions",
-    progress: Math.min(3, quizAnswers),
-    target: 3
-  },
-  {
-    icon: "📄",
-    title: "Upload 1 homework task",
-    progress: Math.min(1, homeworkCount),
-    target: 1
-  }
-];
+  const dailyChallenges = [
+    { icon:"💬", title:"Ask 3 AI questions", progress:Math.min(3, chatCount), target:3 },
+    { icon:"🧠", title:"Answer 3 quiz questions", progress:Math.min(3, quizAnswers), target:3 },
+    { icon:"📄", title:"Upload 1 homework task", progress:Math.min(1, homeworkCount), target:1 }
+  ];
+
   const dash = el("dashboardPage");
   if(!dash) return;
 
   dash.innerHTML = `
-    <div class="premium-hero">
+    <div class="dash-hero-pro">
       <div>
         <p class="eyebrow">StudyCoach AI</p>
-        <h1>Welcome back, ${escapeHtml(name)} 👋</h1>
-        <p>Your personal AI tutor is ready for today's study.</p>
+        <h1>Good to see you, ${escapeHtml(name)} 👋</h1>
+        <p>Ready to earn XP and keep your streak alive?</p>
       </div>
       <button onclick="newChat()">Start studying</button>
     </div>
 
-    <div class="level-card">
-      <p class="eyebrow">Current Level</p>
-      <h2>⭐ Level ${level}</h2>
-      <p><b>${xp}</b> / ${nextLevelXp} XP to reach Level ${level + 1}</p>
-      <div class="progress-track">
-        <div class="progress-fill" style="width:${xpPercent}%"></div>
+    <div class="dash-top-grid">
+      <div class="dash-main-card">
+        <p class="eyebrow">Current Level</p>
+        <h2>⭐ Level ${level}</h2>
+        <p><b>${xp}</b> / ${nextLevelXp} XP</p>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${xpPercent}%"></div>
+        </div>
       </div>
-    </div>
 
-    <div class="pro-stats">
-      <div class="pro-card"><span>🔥</span><b>${d.streak || 0}</b><p>Day streak</p></div>
-      <div class="pro-card"><span>📚</span><b>${d.total || 0}</b><p>Study tasks</p></div>
-      <div class="pro-card"><span>⏱️</span><b>${hours}h</b><p>Study time</p></div>
-      <div class="pro-card"><span>🎯</span><b>${progress}%</b><p>Weekly goal</p></div>
+      <div class="dash-mini-card"><span>🔥</span><h3>${d.streak || 0}</h3><p>Day streak</p></div>
+      <div class="dash-mini-card"><span>📚</span><h3>${d.total || 0}</h3><p>Study tasks</p></div>
+      <div class="dash-mini-card"><span>🎯</span><h3>${progress}%</h3><p>Weekly goal</p></div>
     </div>
 
     <div class="dashboard-grid">
-
       <div class="panel big-panel">
         <h3>🎯 Today's Mission</h3>
         <div class="mission-list">
@@ -338,102 +321,49 @@ const dailyChallenges = [
           <div>☐ Study for 20 minutes</div>
         </div>
       </div>
-<div class="panel big-panel">
-  <h3>🏆 Daily Challenges</h3>
 
-  <div class="challenge-list">
-    ${dailyChallenges.map(c => `
-      <div class="challenge-row">
-        <span>${c.icon}</span>
-        <div>
-          <b>${c.title}</b>
-          <p>${c.progress} / ${c.target} complete</p>
-          <div class="challenge-track">
-            <div class="challenge-fill" style="width:${Math.round((c.progress / c.target) * 100)}%"></div>
-          </div>
+      <div class="panel big-panel">
+        <h3>🏆 Daily Challenges</h3>
+        <div class="challenge-list">
+          ${dailyChallenges.map(c => `
+            <div class="challenge-row">
+              <span>${c.icon}</span>
+              <div>
+                <b>${c.title}</b>
+                <p>${c.progress} / ${c.target} complete</p>
+                <div class="challenge-track">
+                  <div class="challenge-fill" style="width:${Math.round((c.progress / c.target) * 100)}%"></div>
+                </div>
+              </div>
+            </div>
+          `).join("")}
         </div>
       </div>
-    `).join("")}
-  </div>
-</div>
-     <div class="panel big-panel">
-  <h3>📊 Analytics</h3>
 
-  <div class="analytics-grid">
-    <div class="analytics-card"><span>📚</span><h2>${analytics.studyTasks || 0}</h2><p>Total Study Tasks</p></div>
-    <div class="analytics-card"><span>🧪</span><h2>${analytics.quizCount || 0}</h2><p>Quizzes Completed</p></div>
-    <div class="analytics-card"><span>📄</span><h2>${analytics.homeworkAverage || 0}</h2><p>Homework Uploaded</p></div>
-    <div class="analytics-card"><span>🃏</span><h2>${analytics.flashcardCount || 0}</h2><p>Flashcard Sessions</p></div>
-  </div>
-
-  <div class="chart-panel">
-    <h3>📈 Weekly Study Activity</h3>
-
-    <div class="bar-chart">
-      ${(analytics.weeklyStudy || [0,0,0,0,0,0,0]).map(v => `
-        <div class="bar-wrap">
-          <div class="bar" style="height:${Math.max(8, v * 12)}px"></div>
+      <div class="panel big-panel">
+        <h3>📊 Analytics</h3>
+        <div class="analytics-grid">
+          <div class="analytics-card"><span>📚</span><h2>${analytics.studyTasks || 0}</h2><p>Total Tasks</p></div>
+          <div class="analytics-card"><span>🧪</span><h2>${analytics.quizCount || 0}</h2><p>Quizzes</p></div>
+          <div class="analytics-card"><span>📄</span><h2>${analytics.homeworkAverage || 0}</h2><p>Homework</p></div>
+          <div class="analytics-card"><span>🃏</span><h2>${analytics.flashcardCount || 0}</h2><p>Flashcards</p></div>
         </div>
-      `).join("")}
-    </div>
+      </div>
 
-    <div class="week-labels">
-      <span>Mon</span>
-      <span>Tue</span>
-      <span>Wed</span>
-      <span>Thu</span>
-      <span>Fri</span>
-      <span>Sat</span>
-      <span>Sun</span>
-    </div>
-  </div>
-
-  <div class="chart-panel">
-    <h3>📚 Subject Breakdown</h3>
-
-    <div class="subject-bars">
-      ${Object.entries(analytics.subjectData || {}).length
-        ? Object.entries(analytics.subjectData || {}).map(([subject, count]) => `
-          <div class="subject-row">
-            <div class="subject-top">
-              <b>${escapeHtml(subject)}</b>
-              <span>${count}</span>
-            </div>
-            <div class="subject-track">
-              <div class="subject-fill" style="width:${Math.min(100, count * 15)}%"></div>
-            </div>
-          </div>
-        `).join("")
-        : "<p>No subject data yet.</p>"
-      }
-    </div>
-  </div>
-</div>
       <div class="panel">
         <h3>🤖 AI Daily Coach</h3>
         <pre class="coach-text">${escapeHtml(dailyCoach)}</pre>
       </div>
 
       <div class="panel">
-        <h3>🏆 Achievements</h3>
-        <div class="badge-list">
-          ${achievements.length
-            ? achievements.slice(0, 6).map(a => `<span class="badge">${escapeHtml(a)}</span>`).join("")
-            : "<p>No achievements unlocked yet.</p>"
-          }
-        </div>
-      </div>
-
-      <div class="panel">
-        <h3>⚡ Quick Start</h3>
+        <h3>⚡ Quick Actions</h3>
         <div class="quick">
           <button data-prompt="Explain fractions for my year level">Explain fractions</button>
           <button data-prompt="Quiz me on photosynthesis">Quiz photosynthesis</button>
-          <button data-prompt="Help me write an essay introduction">Essay help</button>
+          <button onclick="setPage('tools')">Open quiz tools</button>
           <button onclick="setPage('profile')">View AI profile</button>
         </div>
       </div>
-
     </div>
   `;
 
