@@ -83,16 +83,35 @@ async function authAction(){
 }
 
 async function showApp(){
+  const loading = el("loadingScreen");
+  const fill = el("loadingFill");
+
+  if(loading){
+    loading.classList.remove("hidden");
+  }
+
+  if(fill){
+    fill.style.width = "15%";
+  }
+
   el("marketing")?.classList.add("hidden");
   el("auth")?.classList.add("hidden");
-  el("app")?.classList.remove("hidden");
 
-  const footer = document.querySelector(".site-footer");
-  if (footer) footer.style.display = "none";
+  if(fill) fill.style.width = "45%";
 
   await loadMe();
+
+  if(fill) fill.style.width = "70%";
+
   await loadHistory();
   await loadDashboard();
+
+  if(fill) fill.style.width = "100%";
+
+  setTimeout(() => {
+    if(loading) loading.classList.add("hidden");
+    el("app")?.classList.remove("hidden");
+  }, 450);
 }
 
 async function loadMe(){
