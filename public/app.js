@@ -444,6 +444,7 @@ const studyDates = progressData.studyDates || [];
 const achievementData = await get("/api/achievements");
 const earnedAchievements = achievementData.achievements || [];
  const today = new Date();
+  const todayKey = today.toISOString().slice(0, 10);
 const monthLabel = today.toLocaleDateString("en-NZ", {
   month: "long",
   year: "numeric"
