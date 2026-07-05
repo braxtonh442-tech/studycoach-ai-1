@@ -531,19 +531,22 @@ const earnedAchievements = achievementData.achievements || [];
       </div>
     </div>
 
-    <div class="panel">
-  <h3>🏆 Achievements</h3>
+  <div class="panel">
+  <h3>🏆 Achievement Gallery</h3>
 
-  <div class="badge-list">
-    ${
-      earnedAchievements.length
-        ? earnedAchievements.map(a => `
-            <span class="badge">
-              ${a.icon} ${escapeHtml(a.title)}
-            </span>
-          `).join("")
-        : "<p>No achievements unlocked yet.</p>"
-    }
+  <div class="achievement-gallery">
+    ${allAchievements.map(a => {
+      const earned = earnedAchievements.find(e => e.achievement_key === a.key);
+
+      return `
+        <div class="achievement-card ${earned ? "unlocked" : "locked"}">
+          <div class="achievement-icon">${earned ? a.icon : "🔒"}</div>
+          <h4>${escapeHtml(a.title)}</h4>
+          <p>${escapeHtml(a.description)}</p>
+          <span>${earned ? "Unlocked" : "Locked"}</span>
+        </div>
+      `;
+    }).join("")}
   </div>
 </div>
   `;
