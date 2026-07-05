@@ -108,10 +108,20 @@ async function showApp(){
 
   if(fill) fill.style.width = "100%";
 
-  setTimeout(() => {
-    if(loading) loading.classList.add("hidden");
-    el("app")?.classList.remove("hidden");
-  }, 450);
+// Show the app first
+el("app")?.classList.remove("hidden");
+
+// Then hide the loading screen
+setTimeout(() => {
+  if (loading) {
+    loading.style.opacity = "0";
+
+    setTimeout(() => {
+      loading.classList.add("hidden");
+      loading.style.opacity = "1";
+    }, 400);
+  }
+}, 100);
 }
 
 async function loadMe(){
