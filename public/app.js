@@ -455,12 +455,14 @@ for (let i = 27; i >= 0; i--) {
     studied: studyDates.includes(dateKey)
   });
 }
-  const allAchievements = [
-      key: "first-ai-question",
+const allAchievements = [
+  {
+    key: "first-ai-question",
     icon: "💬",
     title: "First AI Question",
     description: "Ask your first AI question."
   },
+  
   {
     key: "first-quiz-answer",
     icon: "🧠",
