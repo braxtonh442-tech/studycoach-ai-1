@@ -92,8 +92,12 @@ async function showApp() {
 
     el("marketing")?.classList.add("hidden");
     el("auth")?.classList.add("hidden");
-    el("app")?.classList.remove("hidden");
+    const app = el("app");
+app?.classList.remove("hidden");
 
+setTimeout(() => {
+  app?.classList.add("show");
+}, 50);
     if (fill) fill.style.width = "50%";
 
     await loadMe();
