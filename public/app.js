@@ -439,6 +439,38 @@ async function loadProfile() {
   const d = await get("/api/profile");
 const achievementData = await get("/api/achievements");
 const earnedAchievements = achievementData.achievements || [];
+  const allAchievements = [
+  {
+    key: "first-ai-question",
+    icon: "💬",
+    title: "First AI Question",
+    description: "Ask your first AI question."
+  },
+  {
+    key: "first-quiz-answer",
+    icon: "🧠",
+    title: "First Quiz Answer",
+    description: "Answer your first quiz question."
+  },
+  {
+    key: "first-flashcards",
+    icon: "🃏",
+    title: "First Flashcards",
+    description: "Create your first flashcard set."
+  },
+  {
+    key: "first-homework",
+    icon: "📄",
+    title: "First Homework Upload",
+    description: "Upload your first homework."
+  },
+  {
+    key: "study-starter",
+    icon: "🚀",
+    title: "Study Starter",
+    description: "Complete 10 study activities."
+  }
+];
   if (d.error) {
     el("profileOut").innerHTML = `<p>${escapeHtml(d.error)}</p>`;
     return;
