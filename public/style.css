@@ -659,3 +659,17 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
 <div class="streak-day ${d.studied ? "studied" : ""} ${d.isToday ? "today" : ""}" title="${d.dateKey}">
   ${d.day}
 </div>
+.streak-weekdays{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:10px;
+  margin:12px 0 8px;
+  text-align:center;
+  font-size:12px;
+  font-weight:700;
+  color:#94a3b8;
+}
+
+.streak-weekdays span{
+  padding:4px 0;
+}
