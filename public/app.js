@@ -441,27 +441,26 @@ async function loadProfile() {
 const studyDates = progressData.studyDates || [];
 const achievementData = await get("/api/achievements");
 const earnedAchievements = achievementData.achievements || [];
-  {
-    const today = new Date();
+ const today = new Date();
 const calendarDays = [];
 
-for(let i = 27; i >= 0; i--){
+for (let i = 27; i >= 0; i--) {
   const d = new Date(today);
   d.setDate(today.getDate() - i);
 
-  const dateKey = d.toISOString().slice(0,10);
+  const dateKey = d.toISOString().slice(0, 10);
 
   calendarDays.push({
     day: d.getDate(),
     studied: studyDates.includes(dateKey)
   });
 }
-    key: "first-ai-question",
+  const allAchievements = [
+      key: "first-ai-question",
     icon: "💬",
     title: "First AI Question",
     description: "Ask your first AI question."
   },
-  const allAchievements = [
   {
     key: "first-quiz-answer",
     icon: "🧠",
