@@ -498,6 +498,22 @@ const earnedAchievements = achievementData.achievements || [];
         <p><b>Quiz Average:</b> ${p.quiz_average || 0}/10</p>
       </div>
     </div>
+
+    <div class="panel">
+  <h3>🏆 Achievements</h3>
+
+  <div class="badge-list">
+    ${
+      earnedAchievements.length
+        ? earnedAchievements.map(a => `
+            <span class="badge">
+              ${a.icon} ${escapeHtml(a.title)}
+            </span>
+          `).join("")
+        : "<p>No achievements unlocked yet.</p>"
+    }
+  </div>
+</div>
   `;
 }
 async function loadParent(){
