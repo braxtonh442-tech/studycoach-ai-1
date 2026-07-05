@@ -766,3 +766,11 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
   0%,100%{transform:translateY(0);}
   50%{transform:translateY(-10px);}
 }
+.app{
+  opacity:1;
+}
+
+.loading-screen{
+  opacity:1;
+  transition:opacity .4s ease;
+}
