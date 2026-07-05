@@ -611,6 +611,11 @@ async function checkQuizAnswer(){
   `;
   await loadDashboard();
 await loadProfile();
+
+showAchievement(
+  "🎉 +10 XP Earned!",
+  "Great work! Your dashboard and level have been updated."
+);
 }
 
 function nextQuizQuestion(){
