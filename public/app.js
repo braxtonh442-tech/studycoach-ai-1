@@ -444,7 +444,10 @@ const studyDates = progressData.studyDates || [];
 const achievementData = await get("/api/achievements");
 const earnedAchievements = achievementData.achievements || [];
  const today = new Date();
-const today = new Date();
+const monthLabel = today.toLocaleDateString("en-NZ", {
+  month: "long",
+  year: "numeric"
+});
 const calendarDays = [];
 
 const startDate = new Date(today);
@@ -559,7 +562,9 @@ const allAchievements = [
     </div>
     
 <div class="panel">
- <h3>🔥 Study Streak Calendar</h3>
+<h3>🔥 Study Streak Calendar</h3>
+
+<h4 class="calendar-month">${monthLabel}</h4>
 <div class="streak-stats">
   <div class="streak-stat">
     <h2>🔥 ${currentStreak}</h2>
