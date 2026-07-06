@@ -346,11 +346,15 @@ async function loadDashboard(){
       </div>
 
 <div class="panel">
-  <h3>🎁 Daily Reward</h3>
-  <p>Claim your daily study bonus.</p>
-  <button id="claimRewardBtn" onclick="claimDailyReward()">
-    ${d.claimedToday ? "✅ Come back tomorrow" : "🎁 Claim +25 XP"}
-  </button>
+  <div class="daily-reward-card">
+  <div class="reward-icon">🎁</div>
+  <div>
+    <h3>Daily Reward</h3>
+    <p>${d.claimedToday ? "Reward claimed today." : "Claim your daily +25 XP bonus."}</p>
+    <button id="claimRewardBtn" onclick="claimDailyReward()" ${d.claimedToday ? "disabled" : ""}>
+      ${d.claimedToday ? "✅ Come back tomorrow" : "🎁 Claim +25 XP"}
+    </button>
+  </div>
 </div>
 
       <div class="panel big-panel">
