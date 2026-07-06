@@ -81,6 +81,20 @@ async function authAction(){
   localStorage.setItem("studycoach_7_token", token);
   showApp();
 }
+async function forgotPassword(){
+  const email = value("email");
+
+  if(!email){
+    if(el("authMsg")) el("authMsg").textContent = "Type your email first.";
+    return;
+  }
+
+  const d = await post("/api/forgot-password", { email }, false);
+
+  if(el("authMsg")){
+    el("authMsg").textContent = d.message || d.error || "If that email exists, a reset link has been sent.";
+  }
+}
 
 async function showApp() {
   const loading = el("loadingScreen");
@@ -1016,7 +1030,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   on("startFreePrice", showSignup);
   on("premiumPrice", showSignup);
-
+  on("forgotPasswordBtn", forgotPassword);
   on("authBtn", authAction);
   on("switchAuth", toggleAuth);
   on("backHome", backHome);
