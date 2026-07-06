@@ -252,7 +252,31 @@ async function openHistoryChat(id){
   addMsg("user", chat.message);
   addMsg("bot", chat.answer);
 }
+async function claimDailyReward(){
 
+  const d = await post("/api/claim-daily-reward", {}, true);
+
+  if(d.error){
+    alert(d.error);
+    return;
+  }
+
+  if(!d.claimed){
+    showAchievement(
+      "📅 Daily Reward",
+      "You've already claimed today's reward. Come back tomorrow!"
+    );
+    return;
+  }
+
+  showAchievement(
+    "🎁 +25 XP!",
+    "Daily reward claimed!"
+  );
+
+  await loadDashboard();
+  await loadProfile();
+}
 async function loadDashboard(){
   if(!token) return;
 
