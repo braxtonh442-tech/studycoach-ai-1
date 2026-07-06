@@ -301,15 +301,14 @@ async function loadDashboard(){
       <div class="dash-main-card">
         <p class="eyebrow">Current Level</p>
         <h2>⭐ Level ${level}</h2>
-        <p><b>${xp}</b> / ${nextLevelXp} XP</p>
+     <p><b id="dashXp">0</b> / ${nextLevelXp} XP</p>
         <div class="progress-track">
           <div class="progress-fill" style="width:${xpPercent}%"></div>
         </div>
       </div>
-
-      <div class="dash-mini-card"><span>🔥</span><h3>${d.streak || 0}</h3><p>Day streak</p></div>
-      <div class="dash-mini-card"><span>📚</span><h3>${d.total || 0}</h3><p>Study tasks</p></div>
-      <div class="dash-mini-card"><span>🎯</span><h3>${progress}%</h3><p>Weekly goal</p></div>
+<div class="dash-mini-card"><span>🔥</span><h3 id="dashStreakNum">0</h3><p>Day streak</p></div>
+<div class="dash-mini-card"><span>📚</span><h3 id="dashTasksNum">0</h3><p>Study tasks</p></div>
+<div class="dash-mini-card"><span>🎯</span><h3 id="dashGoalNum">0%</h3><p>Weekly goal</p></div>
     </div>
 
     <div class="dashboard-grid">
@@ -384,6 +383,10 @@ function animateNumber(id, end, suffix = ""){
 
   requestAnimationFrame(tick);
 }
+  animateNumber("dashXp", xp);
+animateNumber("dashStreakNum", d.streak || 0);
+animateNumber("dashTasksNum", d.total || 0);
+animateNumber("dashGoalNum", progress, "%");
   wirePromptButtons();
 }
 async function loadProgress(){
