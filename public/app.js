@@ -366,7 +366,24 @@ async function loadDashboard(){
       </div>
     </div>
   `;
+function animateNumber(id, end, suffix = ""){
+  const node = el(id);
+  if(!node) return;
 
+  let start = 0;
+  const duration = 800;
+  const startTime = performance.now();
+
+  function tick(now){
+    const progress = Math.min((now - startTime) / duration, 1);
+    const value = Math.round(start + (end - start) * progress);
+    node.textContent = value + suffix;
+
+    if(progress < 1) requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+}
   wirePromptButtons();
 }
 async function loadProgress(){
