@@ -321,6 +321,14 @@ async function loadDashboard(){
         </div>
       </div>
 
+<div class="panel">
+  <h3>🎁 Daily Reward</h3>
+  <p>Claim your daily study bonus.</p>
+  <button id="claimRewardBtn" onclick="claimDailyReward()">
+    ${d.claimedToday ? "✅ Come back tomorrow" : "🎁 Claim +25 XP"}
+  </button>
+</div>
+
       <div class="panel big-panel">
         <h3>🏆 Daily Challenges</h3>
         <div class="challenge-list">
