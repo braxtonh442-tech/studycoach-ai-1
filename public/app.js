@@ -303,7 +303,7 @@ async function loadDashboard(){
         <h2>⭐ Level ${level}</h2>
      <p><b id="dashXp">0</b> / ${nextLevelXp} XP</p>
         <div class="progress-track">
-          <div class="progress-fill" style="width:${xpPercent}%"></div>
+      <div id="xpBarFill" class="progress-fill" style="width:0%"></div>
         </div>
       </div>
 <div class="dash-mini-card"><span>🔥</span><h3 id="dashStreakNum">0</h3><p>Day streak</p></div>
@@ -387,6 +387,13 @@ function animateNumber(id, end, suffix = ""){
 animateNumber("dashStreakNum", d.streak || 0);
 animateNumber("dashTasksNum", d.total || 0);
 animateNumber("dashGoalNum", progress, "%");
+  
+  setTimeout(() => {
+  const bar = el("xpBarFill");
+  if (bar) {
+    bar.style.width = xpPercent + "%";
+  }
+}, 200);
   wirePromptButtons();
 }
 async function loadProgress(){
