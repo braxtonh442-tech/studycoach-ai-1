@@ -1,7 +1,26 @@
 let token = localStorage.getItem("studycoach_7_token") || "";
 let mode = "signup";
 let currentUser = null;
+let tourStep = 0;
 
+const tourSlides = [
+  {
+    title: "🤖 AI Tutor",
+    text: "Ask questions and get step-by-step help."
+  },
+  {
+    title: "📄 Homework Upload",
+    text: "Upload homework and get helpful feedback."
+  },
+  {
+    title: "🏆 XP & Rewards",
+    text: "Earn XP, unlock achievements, keep streaks, and claim daily rewards."
+  },
+  {
+    title: "🎉 You're ready!",
+    text: "Start studying and build your learning profile."
+  }
+];
 const years = ["Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9","Year 10","Year 11","Year 12","Year 13","University","Adult Learner"];
 
 function el(id){ return document.getElementById(id); }
@@ -120,7 +139,10 @@ setTimeout(() => {
 
     await loadHistory();
     await loadDashboard();
-
+if(!localStorage.getItem("studycoach_tour_done")){
+  el("welcomeTour")?.classList.remove("hidden");
+  el("tourNextBtn").onclick = nextTourStep;
+}
     if (fill) fill.style.width = "100%";
   } catch (err) {
     console.error("Loading error:", err);
@@ -130,7 +152,26 @@ setTimeout(() => {
     }, 300);
   }
 }
+function nextTourStep(){
+  tourStep++;
 
+  if(tourStep >= tourSlides.length){
+    el("welcomeTour")?.classList.add("hidden");
+    localStorage.setItem("studycoach_tour_done", "yes");
+    return;
+  }
+
+  const slide = tourSlides[tourStep];
+
+  el("tourContent").innerHTML = `
+    <h1>👋 Welcome to StudyCoach AI</h1>
+    <h2>${slide.title}</h2>
+    <p>${slide.text}</p>
+    <button id="tourNextBtn">${tourStep === tourSlides.length - 1 ? "Start studying" : "Next →"}</button>
+  `;
+
+  el("tourNextBtn").onclick = nextTourStep;
+}
 
 async function loadMe(){
   if(!token) return;
