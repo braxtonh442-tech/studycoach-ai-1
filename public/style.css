@@ -1226,3 +1226,17 @@ header {
     padding-left: 65px;
   }
 }
+/* Dashboard cards on mobile */
+@media (max-width:850px){
+
+  .dash-top-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+  }
+
+  .dash-main-card{
+    grid-column:1 / -1;
+  }
+
+}
