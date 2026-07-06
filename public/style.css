@@ -1338,3 +1338,46 @@ header {
 .profile-grid{
     gap:10px !important;
 }
+/* ===== Welcome Tour ===== */
+
+.welcome-tour{
+  position:fixed;
+  inset:0;
+  background:rgba(2,6,23,.92);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:20000;
+  padding:20px;
+}
+
+.tour-card{
+  width:100%;
+  max-width:460px;
+  background:linear-gradient(135deg,#172033,#0f172a);
+  border:1px solid #334155;
+  border-radius:28px;
+  padding:30px;
+  text-align:center;
+  box-shadow:0 30px 80px rgba(0,0,0,.45);
+}
+
+.tour-card h1{
+  font-size:34px;
+  margin:0 0 10px;
+}
+
+.tour-card h2{
+  font-size:28px;
+  margin:20px 0 10px;
+}
+
+.tour-card p{
+  color:#cbd5e1;
+  line-height:1.6;
+}
+
+#tourNextBtn{
+  margin-top:18px;
+  width:100%;
+}
