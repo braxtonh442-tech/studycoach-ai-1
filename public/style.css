@@ -918,3 +918,14 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
     }
 
 }
+.mobile-logout{
+  display:none;
+}
+
+@media(max-width:850px){
+  .mobile-logout{
+    display:block;
+    padding:8px 14px;
+    font-size:13px;
+  }
+}
