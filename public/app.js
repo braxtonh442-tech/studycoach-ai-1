@@ -1047,7 +1047,9 @@ on("mobileLogoutBtn", logout);
   on("navTeacher", () => setPage("teacher"));
   on("navPricing", () => setPage("pricing"));
   on("navDebug", () => setPage("debug"));
-
+on("mobileMenuBtn", () => {
+  el("sideMenu")?.classList.toggle("open");
+});
   on("logoutBtn", logout);
   on("sendBtn", send);
   on("voiceBtn", startVoice);
