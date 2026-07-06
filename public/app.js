@@ -274,8 +274,8 @@ async function claimDailyReward(){
     "Daily reward claimed!"
   );
 
-  await loadDashboard();
-  await loadProfile();
+await loadDashboard();
+setPage("dashboard");
 }
 async function loadDashboard(){
   if(!token) return;
