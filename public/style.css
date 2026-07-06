@@ -1240,3 +1240,30 @@ header {
   }
 
 }
+/* ===== Mobile Dashboard Cards ===== */
+
+@media (max-width:850px){
+
+  .dashboard-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+
+  .analytics-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .quick{
+    grid-template-columns:1fr;
+  }
+
+  .challenge-list{
+    gap:12px;
+  }
+
+  .challenge-row{
+    padding:14px;
+  }
+
+}
