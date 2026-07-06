@@ -1034,7 +1034,7 @@ document.addEventListener("DOMContentLoaded", () => {
   on("authBtn", authAction);
   on("switchAuth", toggleAuth);
   on("backHome", backHome);
-
+on("mobileLogoutBtn", logout);
   on("newChat", newChat);
   on("navDashboard", () => { setPage("dashboard"); loadDashboard(); });
   on("navChat", () => setPage("chat"));
