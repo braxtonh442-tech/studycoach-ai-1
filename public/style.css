@@ -1267,3 +1267,44 @@ header {
   }
 
 }
+/* ===== Mobile AI Tutor ===== */
+
+@media (max-width:850px){
+
+  .messages{
+    height:calc(100vh - 190px);
+    padding:14px;
+    border-radius:18px;
+  }
+
+  .msg{
+    padding:14px 6px;
+  }
+
+  .msg .inner{
+    gap:10px;
+  }
+
+  .text{
+    font-size:14px;
+    padding:12px 14px;
+  }
+
+  .composer{
+    left:0;
+    right:0;
+    padding:10px;
+    border-radius:18px 18px 0 0;
+  }
+
+  .composer textarea{
+    min-height:46px;
+    font-size:14px;
+  }
+
+  .composer button{
+    width:46px;
+    height:46px;
+  }
+
+}
