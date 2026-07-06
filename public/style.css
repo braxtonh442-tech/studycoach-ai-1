@@ -1308,3 +1308,33 @@ header {
   }
 
 }
+/* ===== Make dashboard more compact ===== */
+
+.dashboard-grid{
+    gap:10px !important;
+}
+
+.panel{
+    margin:0 !important;
+    padding:16px !important;
+}
+
+.big-panel{
+    margin:0 !important;
+}
+
+.dash-top-grid{
+    gap:10px !important;
+}
+
+.analytics-grid{
+    gap:10px !important;
+}
+
+.challenge-list{
+    gap:10px !important;
+}
+
+.profile-grid{
+    gap:10px !important;
+}
