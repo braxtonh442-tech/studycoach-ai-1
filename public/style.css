@@ -129,7 +129,9 @@ body{margin:0;font-family:Arial;background:#0e1117;color:#f8fafc}*{box-sizing:bo
   background:linear-gradient(90deg,#71e6b3,#72a7ff);
   border-radius:999px;
 }
-
+.progress-fill{
+  transition: width 1s ease;
+}
 .badge-list{
   display:flex;
   gap:8px;
