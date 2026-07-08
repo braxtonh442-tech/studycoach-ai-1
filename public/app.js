@@ -72,7 +72,38 @@ function backHome(){
 function toggleAuth(){
   mode === "signup" ? showLogin() : showSignup();
 }
+async function forgotPassword(){
 
+  const email = value("email");
+
+  if(!email){
+    alert("Please enter your email address first.");
+    return;
+  }
+
+  try{
+
+    const r = await fetch("/api/forgot-password",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({ email })
+    });
+
+    const d = await r.json();
+
+    if(d.error){
+      alert(d.error);
+      return;
+    }
+
+    alert("If that email exists, we've sent a password reset link.");
+
+  }catch(err){
+    alert("Unable to send reset email.");
+  }
+}
 async function authAction(){
   const endpoint = mode === "signup" ? "/api/signup" : "/api/login";
   const body = mode === "signup"
