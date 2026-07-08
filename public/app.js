@@ -1004,6 +1004,28 @@ function requirePremium(featureName){
   setPage("pricing");
   return false;
 }
+async function startTrial(){
+
+  const d = await post("/api/start-trial", {}, true);
+
+  if(d.error){
+    alert(d.error);
+    return;
+  }
+
+  alert("🎉 Your 7-Day Premium Trial has started!");
+
+  await loadDashboard();
+  await loadProfile();
+
+  const me = await get("/api/me");
+
+  if(me.user){
+    currentUser = me.user;
+  }
+
+  setPage("pricing");
+}
 async function stripeUpgrade(){
   const d = await post("/api/create-checkout-session", {}, true);
 
