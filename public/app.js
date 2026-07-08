@@ -1156,6 +1156,7 @@ on("mobileMenuBtn", () => {
   on("makeQuiz", makeQuiz);
   on("makeFlash", makeFlash);
   on("loadTeacher", loadTeacher);
+  on("startTrialBtn", startTrial);
   on("stripeUpgrade", stripeUpgrade);
   on("runDebug", runDebug);
 
