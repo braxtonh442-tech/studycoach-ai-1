@@ -1417,3 +1417,17 @@ header {
   height:46px;
   flex-shrink:0;
 }
+.logo.big{
+  width:90px;
+  height:90px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 20px;
+}
+
+.logo.big img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
