@@ -1383,3 +1383,16 @@ header {
   margin-top:18px;
   width:100%;
 }
+.logo img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.loading-logo-img{
+  width:90px;
+  height:90px;
+  object-fit:contain;
+  margin-bottom:18px;
+  animation:bounce 2s infinite;
+}

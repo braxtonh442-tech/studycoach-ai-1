@@ -13,7 +13,11 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
+<<<<<<< HEAD
     "resend": "^6.17.1",
+=======
+    "resend": "^6.6.0",
+>>>>>>> 88db31bc79c9f20f2fd8fb12296f73d7237b3731
     "stripe": "^16.12.0"
   }
 }
