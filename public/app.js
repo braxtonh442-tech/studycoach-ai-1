@@ -278,21 +278,38 @@ async function send(){
   const m = value("message");
   if(!m) return;
 
+  if(!currentConversationId){
+    const created = await post("/api/conversations", {
+      subject: value("subject")
+    }, true);
+
+    if(created.error){
+      alert(created.error);
+      return;
+    }
+
+    currentConversationId = created.conversation.id;
+  }
+
   if(el("message")) el("message").value = "";
   document.querySelector(".empty")?.remove();
 
   addMsg("user", m);
- const wait = addMsg("bot", "🟢 StudyCoach AI is thinking...");
+  const wait = addMsg("bot", "🟢 StudyCoach AI is thinking...");
 
   const d = await post("/api/chat", {
     message: m,
     subject: value("subject"),
     yearLevel: value("appYear"),
-    country: currentUser?.country || "New Zealand"
+    country: currentUser?.country || "New Zealand",
+    conversationId: currentConversationId
   }, true);
 
   const textBox = document.querySelector("#" + wait + " .text");
-  if(textBox) textBox.textContent = d.answer || d.error || "No answer.";
+
+  if(textBox){
+    textBox.textContent = d.answer || d.error || "No answer.";
+  }
 
   await loadHistory();
   await loadDashboard();
