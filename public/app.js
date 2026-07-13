@@ -334,31 +334,36 @@ function addMsg(role, text){
 }
 
 async function loadHistory() {
-
   if (!token || !el("history")) return;
 
   const d = await get("/api/conversations");
-
   const conversations = d.conversations || [];
 
-  if(conversations.length===0){
-    el("history").innerHTML="<p>No chats yet.</p>";
+  if (conversations.length === 0) {
+    el("history").innerHTML = "<p>No chats yet.</p>";
     return;
   }
 
-  el("history").innerHTML = conversations.map(c=>`
-    <button
-      class="hist"
-      onclick="openConversation('${c.id}')">
-      ${escapeHtml(c.title || "New chat")}
-    </button>
+  el("history").innerHTML = conversations.map(c => `
+    <div class="history-row ${c.id === currentConversationId ? "active" : ""}">
+      <button
+        class="hist"
+        onclick="openConversation('${c.id}')">
+        ${escapeHtml(c.title || "New chat")}
+      </button>
+
+      <button
+        class="delete-chat"
+        onclick="deleteConversation('${c.id}', event)"
+        aria-label="Delete chat">
+        ×
+      </button>
+    </div>
   `).join("");
 
-  // Automatically open the newest conversation
-  if(!currentConversationId){
-    openConversation(conversations[0].id);
+  if (!currentConversationId) {
+    await openConversation(conversations[0].id);
   }
-
 }
 async function openConversation(id){
 
@@ -386,6 +391,36 @@ async function openConversation(id){
 
   });
 
+}
+async function deleteConversation(id, event) {
+  event?.stopPropagation();
+
+  const confirmed = confirm("Delete this chat permanently?");
+  if (!confirmed) return;
+
+  const d = await del("/api/conversations/" + id);
+
+  if (d.error) {
+    alert(d.error);
+    return;
+  }
+
+  if (currentConversationId === id) {
+    currentConversationId = null;
+
+    if (el("messages")) {
+      el("messages").innerHTML = `
+        <div class="empty">
+          <div class="logo big">
+            <img src="/images/logo.svg" alt="StudyCoach AI">
+          </div>
+          <h2>What do you need help with?</h2>
+        </div>
+      `;
+    }
+  }
+
+  await loadHistory();
 }
 async function loadDashboard(){
   if(!token) return;
@@ -1109,7 +1144,34 @@ async function post(url, body, needsAuth) {
     };
   }
 }
+async function del(url) {
+  try {
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        Authorization: "Bearer " + token
+      }
+    });
 
+    const rawText = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      return {
+        error: `Server returned ${response.status} instead of JSON.`
+      };
+    }
+
+    return data;
+  } catch (err) {
+    return {
+      error: "Network/server error: " + err.message
+    };
+  }
+}
 async function get(url){
   try{
     const r = await fetch(url, {
