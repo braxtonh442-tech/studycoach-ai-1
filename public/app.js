@@ -333,68 +333,54 @@ function addMsg(role, text){
   return mid;
 }
 
-async function loadHistory(){
-  if(!token || !el("history")) return;
+async function loadHistory() {
 
-  const d = await get("/api/history");
-  const chats = d.chats || [];
+  if (!token || !el("history")) return;
 
-  if(chats.length === 0){
+  const d = await get("/api/conversations");
+
+  const conversations = d.conversations || [];
+
+  if (conversations.length === 0) {
     el("history").innerHTML = "<p>No chats yet.</p>";
     return;
   }
 
-  el("history").innerHTML = chats.map(c => `
-    <button class="hist" onclick="openHistoryChat('${c.id}')">
-      ${escapeHtml(c.message || "Untitled chat")}
+  el("history").innerHTML = conversations.map(c => `
+    <button class="hist"
+      onclick="openConversation('${c.id}')">
+      ${escapeHtml(c.title || "New chat")}
     </button>
   `).join("");
-  
+
 }
 
-async function openHistoryChat(id){
+async function openConversation(id){
+
+  currentConversationId = id;
+
   setPage("chat");
 
-  const d = await get("/api/chat/" + id);
+  const d = await get("/api/conversations/" + id + "/messages");
 
   if(d.error){
     alert(d.error);
     return;
   }
-
-  const chat = d.chat;
 
   if(el("messages")){
     el("messages").innerHTML = "";
   }
 
-  addMsg("user", chat.message);
-  addMsg("bot", chat.answer);
-}
-async function claimDailyReward(){
+  (d.messages || []).forEach(m => {
 
-  const d = await post("/api/claim-daily-reward", {}, true);
-
-  if(d.error){
-    alert(d.error);
-    return;
-  }
-
-  if(!d.claimed){
-    showAchievement(
-      "📅 Daily Reward",
-      "You've already claimed today's reward. Come back tomorrow!"
+    addMsg(
+      m.role === "assistant" ? "bot" : "user",
+      m.content
     );
-    return;
-  }
 
-  showAchievement(
-    "🎁 +25 XP!",
-    "Daily reward claimed!"
-  );
+  });
 
-await loadDashboard();
-setPage("dashboard");
 }
 async function loadDashboard(){
   if(!token) return;
