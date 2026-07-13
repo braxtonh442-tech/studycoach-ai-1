@@ -337,6 +337,17 @@ async function loadHistory() {
   if (!token || !el("history")) return;
 
   const d = await get("/api/conversations");
+
+  if (d.error) {
+    console.error("Conversation history error:", d.error);
+    el("history").innerHTML = `
+      <p style="color:#f87171;font-size:13px;">
+        ${escapeHtml(d.error)}
+      </p>
+    `;
+    return;
+  }
+
   const conversations = d.conversations || [];
 
   if (conversations.length === 0) {
