@@ -1,6 +1,7 @@
 let token = localStorage.getItem("studycoach_7_token") || "";
 let mode = "signup";
 let currentUser = null;
+let currentConversationId = null;
 let tourStep = 0;
 
 const tourSlides = [
@@ -230,26 +231,41 @@ function setPage(p){
   if(page) page.classList.add("active");
 }
 
-function newChat(){
+async function newChat(){
   setPage("chat");
+
+  const d = await post("/api/conversations", {
+    subject: value("subject")
+  }, true);
+
+  if(d.error){
+    alert(d.error);
+    return;
+  }
+
+  currentConversationId = d.conversation.id;
+
   if(el("messages")){
     el("messages").innerHTML = `
       <div class="empty">
-        <div class="logo big">S</div>
-        <h2>👋 Welcome to StudyCoach AI</h2>
+        <div class="logo big">
+          <img src="/images/logo.svg" alt="StudyCoach AI">
+        </div>
 
-<p style="opacity:.8;margin-top:8px;">
-Ask anything about school, upload homework,
-create quizzes or build study plans.
-</p>
+        <h2>What do you need help with?</h2>
+
         <div class="suggestions">
           <button data-prompt="Explain fractions for my year level">Explain fractions</button>
           <button data-prompt="Quiz me on photosynthesis">Quiz photosynthesis</button>
           <button data-prompt="Help me write an essay introduction">Essay intro</button>
         </div>
-      </div>`;
+      </div>
+    `;
   }
+
   wirePromptButtons();
+  await loadHistory();
+  
 }
 
 function promptSend(t){
