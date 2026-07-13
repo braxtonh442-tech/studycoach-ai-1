@@ -341,20 +341,25 @@ async function loadHistory() {
 
   const conversations = d.conversations || [];
 
-  if (conversations.length === 0) {
-    el("history").innerHTML = "<p>No chats yet.</p>";
+  if(conversations.length===0){
+    el("history").innerHTML="<p>No chats yet.</p>";
     return;
   }
 
-  el("history").innerHTML = conversations.map(c => `
-    <button class="hist"
+  el("history").innerHTML = conversations.map(c=>`
+    <button
+      class="hist"
       onclick="openConversation('${c.id}')">
       ${escapeHtml(c.title || "New chat")}
     </button>
   `).join("");
 
-}
+  // Automatically open the newest conversation
+  if(!currentConversationId){
+    openConversation(conversations[0].id);
+  }
 
+}
 async function openConversation(id){
 
   currentConversationId = id;
