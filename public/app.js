@@ -1183,15 +1183,34 @@ async function del(url) {
     };
   }
 }
-async function get(url){
-  try{
-    const r = await fetch(url, {
-      headers: { Authorization: "Bearer " + token }
+async function get(url) {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        Authorization: "Bearer " + token
+      }
     });
 
-    return await r.json();
-  }catch(e){
-    return { error: "Network/server error: " + e.message };
+    const rawText = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      return {
+        error:
+          `Server returned ${response.status} instead of JSON.\n\n` +
+          rawText.substring(0, 300)
+      };
+    }
+
+    return data;
+
+  } catch (err) {
+    return {
+      error: "Network/server error: " + err.message
+    };
   }
 }
 function showAchievement(title, message){
