@@ -1066,20 +1066,42 @@ async function runDebug(){
   }
 }
 
-async function post(url, body, needsAuth){
-  try{
-    const headers = { "Content-Type": "application/json" };
-    if(needsAuth) headers.Authorization = "Bearer " + token;
+async function post(url, body, needsAuth) {
+  try {
+    const headers = {
+      "Content-Type": "application/json"
+    };
 
-    const r = await fetch(url, {
+    if (needsAuth) {
+      headers.Authorization = "Bearer " + token;
+    }
+
+    const response = await fetch(url, {
       method: "POST",
       headers,
       body: JSON.stringify(body)
     });
 
-    return await r.json();
-  }catch(e){
-    return { error: "Network/server error: " + e.message };
+    const rawText = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      return {
+        error:
+          `Server returned ${response.status} instead of JSON.\n\n` +
+          rawText.substring(0, 300)
+      };
+    }
+
+    return data;
+
+  } catch (err) {
+    return {
+      error: "Network/server error: " + err.message
+    };
   }
 }
 
