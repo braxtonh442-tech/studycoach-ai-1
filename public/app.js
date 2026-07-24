@@ -122,15 +122,22 @@ async function authAction(){
 
   const d = await post(endpoint, body, false);
 
-  if(d.error){
-    if(el("authMsg")) el("authMsg").textContent = d.error;
-    return;
-  }
+if(d.error){
+  if(el("authMsg")) el("authMsg").textContent = d.error;
+  return;
+}
 
-  token = d.token;
-  currentUser = d.user;
-  localStorage.setItem("studycoach_7_token", token);
-  showApp();
+// Track only successful new account registrations
+if(mode === "signup" && typeof gtag === "function"){
+  gtag("event", "sign_up", {
+    method: "email"
+  });
+}
+
+token = d.token;
+currentUser = d.user;
+localStorage.setItem("studycoach_7_token", token);
+showApp();
 }
 async function forgotPassword(){
   const email = value("email");
@@ -1083,6 +1090,16 @@ async function startTrial(){
     return;
   }
 
+  // Track a successfully started trial
+  if(typeof gtag === "function"){
+    gtag("event", "trial_started", {
+      plan: "premium",
+      trial_length_days: 7,
+      value: 14.99,
+      currency: "NZD"
+    });
+  }
+
   alert("🎉 Your 7-Day Premium Trial has started!");
 
   await loadDashboard();
@@ -1095,7 +1112,9 @@ async function startTrial(){
   }
 
   setPage("pricing");
+  
 }
+
 async function stripeUpgrade(){
   const d = await post("/api/create-checkout-session", {}, true);
 
