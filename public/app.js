@@ -558,7 +558,8 @@ async function loadDashboard(){
         <div class="quick">
           <button data-prompt="Explain fractions for my year level">Explain fractions</button>
           <button data-prompt="Quiz me on photosynthesis">Quiz photosynthesis</button>
-          <button onclick="setPage('tools')">Open quiz tools</button>
+          <button onclick="setPage('quiz')">Open Quiz</button>
+          <button onclick="setPage('flashcards')">Open Flashcards</button>
           <button onclick="setPage('profile')">View AI profile</button>
         </div>
       </div>
@@ -608,7 +609,7 @@ async function loadProgress(){
       <p><b>Streak:</b> ${d.streak || 0} days</p>
       <h3>By subject</h3>
       <pre>${escapeHtml(JSON.stringify(d.bySubject || {}, null, 2))}</pre>
-      <h3>Badges</h3>
+        <h3>Badges</h3>
       <div>${badges}</div>`;
   }
 }
@@ -831,10 +832,35 @@ async function makePlan(){
 
 let currentQuiz = [];
 let currentQuizIndex = 0;
+let currentQuizScore = 0;
+let currentQuizAnswered = false;
+
+let currentFlashcards = [];
+let currentFlashcardIndex = 0;
+let flashcardShowingBack = false;
+let flashcardTouchStartX = 0;
 
 async function makeQuiz(){
+  const topic = value("quizTopic");
+
+  if(!topic){
+    if(el("quizOut")){
+      el("quizOut").innerHTML = "<p>Please enter a quiz topic first.</p>";
+    }
+    return;
+  }
+
+  if(el("quizOut")){
+    el("quizOut").innerHTML = `
+      <div class="quiz-card quiz-loading">
+        <h2>Creating your quiz...</h2>
+        <p>StudyCoach AI is preparing questions for you.</p>
+      </div>
+    `;
+  }
+
   const d = await post("/api/quiz",{
-    topic: value("quizTopic"),
+    topic,
     subject: value("subject")
   }, true);
 
@@ -843,8 +869,10 @@ async function makeQuiz(){
     return;
   }
 
-  currentQuiz = d.quiz.questions || [];
+  currentQuiz = d.quiz?.questions || [];
   currentQuizIndex = 0;
+  currentQuizScore = 0;
+  currentQuizAnswered = false;
 
   showQuizQuestion();
   await loadDashboard();
@@ -859,34 +887,76 @@ function showQuizQuestion(){
   }
 
   const q = currentQuiz[currentQuizIndex];
+  const progress = Math.round(
+    ((currentQuizIndex + 1) / currentQuiz.length) * 100
+  );
 
   el("quizOut").innerHTML = `
     <div class="quiz-card">
-      <p class="eyebrow">Question ${currentQuizIndex + 1} of ${currentQuiz.length}</p>
-      <h2>${escapeHtml(q)}</h2>
-
-      <textarea id="quizAnswer" placeholder="Type your answer here..."></textarea>
-
-      <div class="quiz-actions">
-        <button onclick="checkQuizAnswer()">Check answer</button>
-        <button class="secondary" onclick="nextQuizQuestion()">Skip</button>
+      <div class="quiz-top-row">
+        <p class="eyebrow">
+          Question ${currentQuizIndex + 1} of ${currentQuiz.length}
+        </p>
+        <p class="quiz-score">Score: ${currentQuizScore}</p>
       </div>
 
-      <div id="quizFeedback"></div>
+      <div class="quiz-progress-track">
+        <div class="quiz-progress-fill" style="width:${progress}%"></div>
+      </div>
+
+      <h2>${escapeHtml(q)}</h2>
+
+      <textarea
+        id="quizAnswer"
+        placeholder="Type your answer here..."
+        aria-label="Quiz answer"
+      ></textarea>
+
+      <div class="quiz-actions">
+        <button id="checkQuizBtn" onclick="checkQuizAnswer()">
+          Check answer
+        </button>
+        <button
+          id="skipQuizBtn"
+          class="secondary"
+          onclick="nextQuizQuestion()">
+          Skip
+        </button>
+      </div>
+
+      <div id="quizFeedback" aria-live="polite"></div>
     </div>
   `;
+
+  currentQuizAnswered = false;
+
+  el("quizAnswer")?.addEventListener("keydown", event => {
+    if(event.key === "Enter" && !event.shiftKey){
+      event.preventDefault();
+      checkQuizAnswer();
+    }
+  });
 }
 
 async function checkQuizAnswer(){
+  if(currentQuizAnswered) return;
+
   const answer = value("quizAnswer");
   const q = currentQuiz[currentQuizIndex];
 
   if(!answer){
-    el("quizFeedback").innerHTML = "<p>Please type an answer first.</p>";
+    el("quizFeedback").innerHTML =
+      "<p class='quiz-warning'>Please type an answer first.</p>";
     return;
   }
 
   el("quizFeedback").innerHTML = "<p>Checking answer...</p>";
+
+  const checkBtn = el("checkQuizBtn");
+  const skipBtn = el("skipQuizBtn");
+
+  if(checkBtn) checkBtn.disabled = true;
+  if(skipBtn) skipBtn.disabled = true;
 
   const d = await post("/api/check-quiz-answer", {
     question: q,
@@ -897,32 +967,74 @@ async function checkQuizAnswer(){
 
   if(d.error){
     el("quizFeedback").innerHTML = `<p>${escapeHtml(d.error)}</p>`;
+    if(checkBtn) checkBtn.disabled = false;
+    if(skipBtn) skipBtn.disabled = false;
     return;
   }
 
+  currentQuizAnswered = true;
+
+  const resultText = String(d.result || "");
+  const isCorrect =
+    d.correct === true ||
+    /(correct|great job|well done|excellent)/i.test(resultText);
+
+  if(isCorrect){
+    currentQuizScore++;
+  }
+
+  const card = document.querySelector("#quizOut .quiz-card");
+  card?.classList.add(isCorrect ? "quiz-correct" : "quiz-incorrect");
+
   el("quizFeedback").innerHTML = `
-    <div class="feedback-good">
-      ${escapeHtml(d.result)}
+    <div class="${isCorrect ? "feedback-good" : "feedback-review"}">
+      <h3>${isCorrect ? "✅ Correct!" : "📘 Review this answer"}</h3>
+      <p>${escapeHtml(resultText || "Answer checked.")}</p>
+      <button onclick="nextQuizQuestion()">
+        ${currentQuizIndex === currentQuiz.length - 1
+          ? "See results"
+          : "Next question →"}
+      </button>
     </div>
   `;
- await loadDashboard();
-setPage("tools");
 
-showAchievement(
-  "🎉 +10 XP Earned!",
-  "Great work! Your dashboard and level have been updated."
-);
+  await loadDashboard();
+
+  if(isCorrect){
+    showAchievement(
+      "🎉 +10 XP Earned!",
+      "Great work! Your dashboard and level have been updated."
+    );
+  }
 }
 
 function nextQuizQuestion(){
   currentQuizIndex++;
 
   if(currentQuizIndex >= currentQuiz.length){
+    const percentage = currentQuiz.length
+      ? Math.round((currentQuizScore / currentQuiz.length) * 100)
+      : 0;
+
     el("quizOut").innerHTML = `
-      <div class="quiz-card">
-        <h2>🎉 Quiz complete!</h2>
-        <p>You worked through ${currentQuiz.length} questions.</p>
-        <button onclick="makeQuiz()">Try again</button>
+      <div class="quiz-card quiz-complete">
+        <div class="quiz-finish-icon">🏆</div>
+        <p class="eyebrow">Quiz complete</p>
+        <h2>You scored ${currentQuizScore} out of ${currentQuiz.length}</h2>
+        <div class="quiz-final-score">${percentage}%</div>
+        <p>
+          ${percentage >= 80
+            ? "Excellent work — you know this topic well."
+            : percentage >= 50
+              ? "Good effort — review the questions and try again."
+              : "Keep practising — every attempt builds your knowledge."}
+        </p>
+        <div class="quiz-actions">
+          <button onclick="makeQuiz()">Try this quiz again</button>
+          <button class="secondary" onclick="setPage('flashcards')">
+            Study with flashcards
+          </button>
+        </div>
       </div>
     `;
     return;
@@ -932,25 +1044,404 @@ function nextQuizQuestion(){
 }
 
  
-async function makeFlash(){
-  const d = await post("/api/flashcards", {
-    topic: value("flashTopic"),
-    subject: value("subject")
-  }, true);
+function normaliseFlashcards(data){
+  const cards =
+    data?.flashcards?.cards ||
+    data?.cards ||
+    data?.flashcards ||
+    [];
 
-  if(d.error){
-    if(el("flashOut")) el("flashOut").textContent = d.error;
+  if(!Array.isArray(cards)) return [];
+
+  return cards.map(card => {
+    if(typeof card === "string"){
+      const parts = card.split(":");
+      return {
+        front: (parts.shift() || "Question").trim(),
+        back: parts.join(":").trim() || "Answer"
+      };
+    }
+
+    return {
+      front: String(
+        card?.front ??
+        card?.question ??
+        card?.term ??
+        ""
+      ).trim(),
+      back: String(
+        card?.back ??
+        card?.answer ??
+        card?.definition ??
+        ""
+      ).trim()
+    };
+  }).filter(card => card.front && card.back);
+}
+
+async function makeFlash(){
+  const topic = value("flashTopic");
+
+  if(!topic){
+    if(el("flashOut")){
+      el("flashOut").classList.remove("hidden");
+      el("flashOut").textContent =
+        "Please enter a flashcard topic first.";
+    }
     return;
   }
 
-  if(el("flashOut")){
-    el("flashOut").textContent = d.flashcards.cards
-      .map(c => `${c.front}: ${c.back}`)
-      .join("\n\n");
+  el("flashLoading")?.classList.remove("hidden");
+  el("flashcardStudyArea")?.classList.add("hidden");
+  el("flashOut")?.classList.add("hidden");
+
+  const d = await post("/api/flashcards", {
+    topic,
+    subject: value("subject")
+  }, true);
+
+  el("flashLoading")?.classList.add("hidden");
+
+  if(d.error){
+    if(el("flashOut")){
+      el("flashOut").classList.remove("hidden");
+      el("flashOut").textContent = d.error;
+    }
+    return;
   }
 
+  currentFlashcards = normaliseFlashcards(d);
+  currentFlashcardIndex = 0;
+  flashcardShowingBack = false;
+
+  if(currentFlashcards.length === 0){
+    if(el("flashOut")){
+      el("flashOut").classList.remove("hidden");
+      el("flashOut").textContent =
+        "No usable flashcards were returned.";
+    }
+    return;
+  }
+
+  el("flashcardStudyArea")?.classList.remove("hidden");
+  renderFlashcard();
   await loadDashboard();
 }
+
+function renderFlashcard(){
+  if(currentFlashcards.length === 0) return;
+
+  const card = currentFlashcards[currentFlashcardIndex];
+
+  if(el("flashFrontText")) el("flashFrontText").textContent = card.front;
+  if(el("flashBackText")) el("flashBackText").textContent = card.back;
+
+  if(el("flashCounter")){
+    el("flashCounter").textContent =
+      `Card ${currentFlashcardIndex + 1} of ${currentFlashcards.length}`;
+  }
+
+  if(el("flashProgressFill")){
+    const percent =
+      ((currentFlashcardIndex + 1) / currentFlashcards.length) * 100;
+    el("flashProgressFill").style.width = percent + "%";
+  }
+
+  if(el("previousFlashcard")){
+    el("previousFlashcard").disabled =
+      currentFlashcardIndex === 0;
+  }
+
+  if(el("nextFlashcard")){
+    el("nextFlashcard").textContent =
+      currentFlashcardIndex === currentFlashcards.length - 1
+        ? "Finish ✓"
+        : "Next →";
+  }
+
+  flashcardShowingBack = false;
+  el("studyFlashcard")?.classList.remove("flipped");
+  el("flashExplainOut")?.classList.add("hidden");
+}
+
+function flipCurrentFlashcard(){
+  if(currentFlashcards.length === 0) return;
+
+  flashcardShowingBack = !flashcardShowingBack;
+  el("studyFlashcard")?.classList.toggle(
+    "flipped",
+    flashcardShowingBack
+  );
+}
+
+function nextFlashcard(){
+  if(currentFlashcards.length === 0) return;
+
+  if(currentFlashcardIndex < currentFlashcards.length - 1){
+    currentFlashcardIndex++;
+    renderFlashcard();
+    return;
+  }
+
+  const studyArea = el("flashcardStudyArea");
+
+  if(studyArea){
+    studyArea.innerHTML = `
+      <div class="flashcards-complete">
+        <div class="flash-finish-icon">🎉</div>
+        <p class="eyebrow">Set complete</p>
+        <h2>You studied ${currentFlashcards.length} flashcards</h2>
+        <p>Great work. Repeat the set or create a new topic.</p>
+        <div class="flashcard-controls">
+          <button onclick="restartFlashcards()">Study again</button>
+          <button class="secondary" onclick="focusFlashTopic()">
+            New topic
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  showAchievement(
+    "🎉 Flashcard set complete!",
+    `You studied ${currentFlashcards.length} flashcards.`
+  );
+}
+
+function restartFlashcards(){
+  currentFlashcardIndex = 0;
+  flashcardShowingBack = false;
+  restoreFlashcardStudyMarkup();
+  renderFlashcard();
+}
+
+function focusFlashTopic(){
+  el("flashcardStudyArea")?.classList.add("hidden");
+  el("flashTopic")?.focus();
+}
+function restoreFlashcardStudyMarkup(){
+  const area = el("flashcardStudyArea");
+  if(!area) return;
+
+  area.innerHTML = `
+    <div class="flashcard-meta">
+      <span id="flashCounter">Card 1 of 1</span>
+      <div class="flashcard-meta-actions">
+        <button id="shuffleFlashcards" class="secondary" type="button">
+          🔀 Shuffle
+        </button>
+      </div>
+    </div>
+
+    <div class="flash-progress-track" aria-label="Flashcard progress">
+      <div id="flashProgressFill" class="flash-progress-fill"></div>
+    </div>
+
+    <div
+      id="studyFlashcard"
+      class="study-flashcard"
+      role="button"
+      tabindex="0"
+      aria-label="Flashcard. Press Enter or Space to flip.">
+      <div class="study-flashcard-inner">
+        <div class="study-flashcard-face study-flashcard-front">
+          <p class="flash-side-label">QUESTION</p>
+          <div id="flashFrontText" class="flashcard-text"></div>
+          <small>Tap the card to flip</small>
+        </div>
+
+        <div class="study-flashcard-face study-flashcard-back">
+          <p class="flash-side-label">ANSWER</p>
+          <div id="flashBackText" class="flashcard-text"></div>
+          <small>Tap the card to see the question</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="flashcard-controls">
+      <button id="previousFlashcard" class="secondary" type="button">
+        ← Previous
+      </button>
+      <button id="flipFlashcard" type="button">Flip</button>
+      <button id="nextFlashcard" type="button">Next →</button>
+    </div>
+
+    <p class="flashcard-help">
+      Keyboard: ← previous, Space to flip, → next.
+    </p>
+
+    <div id="flashExplainOut" class="output hidden"></div>
+  `;
+
+  wireFlashcardControls();
+}
+
+function previousFlashcard(){
+  if(currentFlashcards.length === 0) return;
+  if(currentFlashcardIndex === 0) return;
+
+  currentFlashcardIndex--;
+  renderFlashcard();
+}
+
+function shuffleFlashcards(){
+  if(currentFlashcards.length === 0) return;
+
+  for(let i = currentFlashcards.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [currentFlashcards[i], currentFlashcards[j]] =
+      [currentFlashcards[j], currentFlashcards[i]];
+  }
+
+  currentFlashcardIndex = 0;
+  renderFlashcard();
+
+  showAchievement(
+    "🔀 Cards shuffled",
+    "Your flashcards are now in a new order."
+  );
+}
+
+function readCurrentFlashcard(){
+  if(currentFlashcards.length === 0){
+    alert("Create some flashcards first.");
+    return;
+  }
+
+  if(!("speechSynthesis" in window)){
+    alert("Read aloud is not supported in this browser.");
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const card = currentFlashcards[currentFlashcardIndex];
+  const textToRead =
+    flashcardShowingBack ? card.back : card.front;
+
+  const speech = new SpeechSynthesisUtterance(textToRead);
+  speech.lang = "en-NZ";
+  speech.rate = 0.95;
+  window.speechSynthesis.speak(speech);
+}
+
+async function explainCurrentFlashcard(){
+  if(currentFlashcards.length === 0){
+    alert("Create some flashcards first.");
+    return;
+  }
+
+  const out = el("flashExplainOut");
+  const card = currentFlashcards[currentFlashcardIndex];
+
+  if(!out) return;
+
+  out.classList.remove("hidden");
+  out.innerHTML =
+    "<p>StudyCoach AI is explaining this card...</p>";
+
+  const d = await post("/api/chat", {
+    message:
+      `Explain this flashcard clearly for ${value("appYear")}.
+` +
+      `Question: ${card.front}
+` +
+      `Answer: ${card.back}
+` +
+      "Give a short explanation and one useful example.",
+    subject: value("subject"),
+    yearLevel: value("appYear"),
+    country: currentUser?.country || "New Zealand",
+    conversationId: currentConversationId
+  }, true);
+
+  if(d.error){
+    out.innerHTML = `<p>${escapeHtml(d.error)}</p>`;
+    return;
+  }
+
+  out.innerHTML = `
+    <div class="flashcard-explanation">
+      <h3>🤖 AI Explanation</h3>
+      <p>${escapeHtml(d.answer || "No explanation returned.")}</p>
+    </div>
+  `;
+}
+
+function handleFlashcardKeyboard(event){
+  const flashcardsPage = el("flashcardsPage");
+
+  if(
+    !flashcardsPage ||
+    !flashcardsPage.classList.contains("active") ||
+    currentFlashcards.length === 0
+  ){
+    return;
+  }
+
+  const activeTag = document.activeElement?.tagName?.toLowerCase();
+
+  if(
+    activeTag === "input" ||
+    activeTag === "textarea" ||
+    activeTag === "select"
+  ){
+    return;
+  }
+
+  if(event.key === "ArrowRight"){
+    event.preventDefault();
+    nextFlashcard();
+  }else if(event.key === "ArrowLeft"){
+    event.preventDefault();
+    previousFlashcard();
+  }else if(event.key === " " || event.key === "Enter"){
+    event.preventDefault();
+    flipCurrentFlashcard();
+  }
+}
+
+function handleFlashcardTouchStart(event){
+  flashcardTouchStartX =
+    event.changedTouches?.[0]?.screenX || 0;
+}
+
+function handleFlashcardTouchEnd(event){
+  const endX = event.changedTouches?.[0]?.screenX || 0;
+  const difference = endX - flashcardTouchStartX;
+
+  if(Math.abs(difference) < 50) return;
+
+  if(difference < 0){
+    nextFlashcard();
+  }else{
+    previousFlashcard();
+  }
+}
+
+function wireFlashcardControls(){
+  const card = el("studyFlashcard");
+
+  if(card){
+    card.onclick = flipCurrentFlashcard;
+    card.addEventListener(
+      "touchstart",
+      handleFlashcardTouchStart,
+      { passive: true }
+    );
+    card.addEventListener(
+      "touchend",
+      handleFlashcardTouchEnd,
+      { passive: true }
+    );
+  }
+
+  if(el("flipFlashcard")) el("flipFlashcard").onclick = flipCurrentFlashcard;
+  if(el("nextFlashcard")) el("nextFlashcard").onclick = nextFlashcard;
+  if(el("previousFlashcard")) el("previousFlashcard").onclick = previousFlashcard;
+  if(el("shuffleFlashcards")) el("shuffleFlashcards").onclick = shuffleFlashcards;
+}
+
 
 async function uploadHomework(){
 
@@ -1290,7 +1781,8 @@ document.addEventListener("DOMContentLoaded", () => {
   on("navChat", () => setPage("chat"));
   on("navUpload", () => setPage("upload"));
   on("navPlan", () => setPage("plan"));
-  on("navTools", () => setPage("tools"));
+  on("navQuiz", () => setPage("quiz"));
+  on("navFlashcards", () => setPage("flashcards"));
   on("navProgress", loadProgress);
   on("navProfile", loadProfile);
   on("navParent", loadParent);
@@ -1312,6 +1804,9 @@ on("mobileMenuBtn", () => {
   });
   on("makeQuiz", makeQuiz);
   on("makeFlash", makeFlash);
+  on("readFlashcard", readCurrentFlashcard);
+  on("explainFlashcard", explainCurrentFlashcard);
+  wireFlashcardControls();
   on("loadTeacher", loadTeacher);
   on("startTrialBtn", startTrial);
   on("stripeUpgrade", stripeUpgrade);
@@ -1323,6 +1818,11 @@ on("mobileMenuBtn", () => {
       send();
     }
   });
+
+  document.addEventListener(
+    "keydown",
+    handleFlashcardKeyboard
+  );
 
   wirePromptButtons();
 
