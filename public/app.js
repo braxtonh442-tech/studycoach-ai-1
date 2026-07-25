@@ -4,44 +4,47 @@ let currentUser = null;
 let currentConversationId = null;
 let tourStep = 0;
 
-const years = ["Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9","Year 10","Year 11","Year 12","Year 13","University","Adult Learner"];
 const tourSlides = [
-  { title:"🤖 AI Tutor", text:"Ask questions and get step-by-step help." },
-  { title:"📄 Homework Upload", text:"Upload homework and get helpful feedback." },
-  { title:"🏆 XP & Rewards", text:"Earn XP, unlock achievements, keep streaks, and claim daily rewards." },
-  { title:"🎉 You're ready!", text:"Start studying and build your learning profile." }
+  {
+    title: "🤖 AI Tutor",
+    text: "Ask questions and get step-by-step help."
+  },
+  {
+    title: "📄 Homework Upload",
+    text: "Upload homework and get helpful feedback."
+  },
+  {
+    title: "🏆 XP & Rewards",
+    text: "Earn XP, unlock achievements, keep streaks, and claim daily rewards."
+  },
+  {
+    title: "🎉 You're ready!",
+    text: "Start studying and build your learning profile."
+  }
 ];
-
-let currentQuiz = [];
-let currentQuizIndex = 0;
-let currentFlashcards = [];
-let currentFlashcardIndex = 0;
-let flashcardShowingBack = false;
-let flashcardTouchStartX = 0;
+const years = ["Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9","Year 10","Year 11","Year 12","Year 13","University","Adult Learner"];
 
 function el(id){ return document.getElementById(id); }
 function value(id){ return el(id) ? el(id).value.trim() : ""; }
+
 function escapeHtml(s){
-  return String(s ?? "").replace(/[&<>"']/g, m => ({
+  return String(s).replace(/[&<>"']/g, m => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
   }[m]));
 }
+
 function fillYears(id){
-  const node = el(id);
-  if(!node) return;
-  node.innerHTML = "";
-  years.forEach(year => {
-    const option = document.createElement("option");
-    option.textContent = year;
-    node.appendChild(option);
+  const s = el(id);
+  if(!s) return;
+  s.innerHTML = "";
+  years.forEach(y => {
+    const o = document.createElement("option");
+    o.textContent = y;
+    s.appendChild(o);
   });
-  node.value = "Year 7";
+  s.value = "Year 7";
 }
-function setPage(pageName){
-  document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
-  el(pageName + "Page")?.classList.add("active");
-  el("sideMenu")?.classList.remove("open");
-}
+
 function showSignup(){
   mode = "signup";
   el("marketing")?.classList.add("hidden");
@@ -51,212 +54,427 @@ function showSignup(){
   if(el("name")) el("name").style.display = "block";
   if(el("authMsg")) el("authMsg").textContent = "";
 }
+
 function showLogin(){
   mode = "login";
   el("marketing")?.classList.add("hidden");
   el("auth")?.classList.remove("hidden");
-  if(el("authTitle")) el("authTitle").textContent = "Log in";
-  if(el("authBtn")) el("authBtn").textContent = "Log in";
+  if(el("authTitle")) el("authTitle").textContent = "Login";
+  if(el("authBtn")) el("authBtn").textContent = "Login";
   if(el("name")) el("name").style.display = "none";
   if(el("authMsg")) el("authMsg").textContent = "";
 }
+
 function backHome(){
   el("auth")?.classList.add("hidden");
   el("marketing")?.classList.remove("hidden");
 }
-function toggleAuth(){ mode === "signup" ? showLogin() : showSignup(); }
 
+function toggleAuth(){
+  mode === "signup" ? showLogin() : showSignup();
+}
+async function forgotPassword(){
+
+  const email = value("email");
+
+  if(!email){
+    alert("Please enter your email address first.");
+    return;
+  }
+
+  try{
+
+    const r = await fetch("/api/forgot-password",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({ email })
+    });
+
+    const d = await r.json();
+
+    if(d.error){
+      alert(d.error);
+      return;
+    }
+
+    alert("If that email exists, we've sent a password reset link.");
+
+  }catch(err){
+    alert("Unable to send reset email.");
+  }
+}
 async function authAction(){
   const endpoint = mode === "signup" ? "/api/signup" : "/api/login";
   const body = mode === "signup"
-    ? { name:value("name"), email:value("email"), password:value("password"), country:value("country"), yearLevel:value("yearLevel") }
-    : { email:value("email"), password:value("password") };
+    ? {
+        name: value("name"),
+        email: value("email"),
+        password: value("password"),
+        country: value("country"),
+        yearLevel: value("yearLevel")
+      }
+    : {
+        email: value("email"),
+        password: value("password")
+      };
 
   const d = await post(endpoint, body, false);
-  if(d.error){
-    if(el("authMsg")) el("authMsg").textContent = d.error;
-    return;
-  }
-  if(mode === "signup" && typeof gtag === "function"){
-    gtag("event","sign_up",{method:"email"});
-  }
-  token = d.token;
-  currentUser = d.user;
-  localStorage.setItem("studycoach_7_token", token);
-  await showApp();
+
+if(d.error){
+  if(el("authMsg")) el("authMsg").textContent = d.error;
+  return;
 }
 
+// Track only successful new account registrations
+if(mode === "signup" && typeof gtag === "function"){
+  gtag("event", "sign_up", {
+    method: "email"
+  });
+}
+
+token = d.token;
+currentUser = d.user;
+localStorage.setItem("studycoach_7_token", token);
+showApp();
+}
 async function forgotPassword(){
   const email = value("email");
+
   if(!email){
     if(el("authMsg")) el("authMsg").textContent = "Type your email first.";
     return;
   }
-  const d = await post("/api/forgot-password",{email},false);
-  if(el("authMsg")) el("authMsg").textContent = d.message || d.error || "If that email exists, a reset link has been sent.";
+
+  const d = await post("/api/forgot-password", { email }, false);
+
+  if(el("authMsg")){
+    el("authMsg").textContent = d.message || d.error || "If that email exists, a reset link has been sent.";
+  }
 }
 
-async function showApp(){
+async function showApp() {
   const loading = el("loadingScreen");
   const fill = el("loadingFill");
-  try{
-    loading?.classList.remove("hidden");
-    if(fill) fill.style.width = "20%";
+
+  try {
+    if (loading) loading.classList.remove("hidden");
+    if (fill) fill.style.width = "20%";
+
     el("marketing")?.classList.add("hidden");
     el("auth")?.classList.add("hidden");
-    el("app")?.classList.remove("hidden");
-    if(fill) fill.style.width = "50%";
+    const app = el("app");
+app?.classList.remove("hidden");
+
+setTimeout(() => {
+  app?.classList.add("show");
+}, 50);
+    if (fill) fill.style.width = "50%";
+
     await loadMe();
-    if(fill) fill.style.width = "70%";
+
+    if (fill) fill.style.width = "70%";
+
     await loadHistory();
     await loadDashboard();
-    if(!localStorage.getItem("studycoach_tour_done")){
-      el("welcomeTour")?.classList.remove("hidden");
-    }
-    if(fill) fill.style.width = "100%";
-  }finally{
-    setTimeout(() => loading?.classList.add("hidden"), 250);
+if(!localStorage.getItem("studycoach_tour_done")){
+  el("welcomeTour")?.classList.remove("hidden");
+  el("tourNextBtn").onclick = nextTourStep;
+}
+    if (fill) fill.style.width = "100%";
+  } catch (err) {
+    console.error("Loading error:", err);
+  } finally {
+    setTimeout(() => {
+      if (loading) loading.classList.add("hidden");
+    }, 300);
   }
 }
-
 function nextTourStep(){
   tourStep++;
+
   if(tourStep >= tourSlides.length){
     el("welcomeTour")?.classList.add("hidden");
-    localStorage.setItem("studycoach_tour_done","yes");
+    localStorage.setItem("studycoach_tour_done", "yes");
     return;
   }
+
   const slide = tourSlides[tourStep];
-  if(el("tourContent")){
-    el("tourContent").innerHTML = `
-      <h1>Welcome to StudyCoach AI</h1>
-      <h2>${slide.title}</h2>
-      <p>${slide.text}</p>
-      <button id="tourNextBtn">${tourStep === tourSlides.length - 1 ? "Start studying" : "Next →"}</button>
-    `;
-    el("tourNextBtn").onclick = nextTourStep;
-  }
+
+  el("tourContent").innerHTML = `
+    <h1>👋 Welcome to StudyCoach AI</h1>
+    <h2>${slide.title}</h2>
+    <p>${slide.text}</p>
+    <button id="tourNextBtn">${tourStep === tourSlides.length - 1 ? "Start studying" : "Next →"}</button>
+  `;
+
+  el("tourNextBtn").onclick = nextTourStep;
 }
 
 async function loadMe(){
   if(!token) return;
   const d = await get("/api/me");
-  if(!d.user) return;
-  currentUser = d.user;
-  if(el("hello")) el("hello").textContent = "Hi " + currentUser.name;
-  if(el("appYear")) el("appYear").value = currentUser.yearLevel || "Year 7";
-  if(el("planText")) el("planText").textContent = currentUser.plan === "premium" ? "Premium plan" : "Free plan";
+
+  if(d.user){
+    currentUser = d.user;
+    if(el("hello")) el("hello").textContent = "Hi " + currentUser.name;
+    if(el("dashTitle")) el("dashTitle").textContent = "Welcome back, " + currentUser.name;
+    if(el("appYear")) el("appYear").value = currentUser.yearLevel || "Year 7";
+    if(el("planText")) el("planText").textContent = currentUser.plan === "premium" ? "Premium plan" : "Free plan";
+  }
 }
+
 function logout(){
+  const footer = document.querySelector(".site-footer");
+  if (footer) footer.style.display = "block";
+
   localStorage.removeItem("studycoach_7_token");
   location.reload();
+}
+function setPage(p){
+  document.querySelectorAll(".page").forEach(x => x.classList.remove("active"));
+  const page = el(p + "Page");
+  if(page) page.classList.add("active");
 }
 
 async function newChat(){
   setPage("chat");
-  const d = await post("/api/conversations",{subject:value("subject")},true);
-  if(d.error) return alert(d.error);
+
+  const d = await post("/api/conversations", {
+    subject: value("subject")
+  }, true);
+
+  if(d.error){
+    alert(d.error);
+    return;
+  }
+
   currentConversationId = d.conversation.id;
+
   if(el("messages")){
     el("messages").innerHTML = `
       <div class="empty">
+        <div class="logo big">
+          <img src="/images/logo.svg" alt="StudyCoach AI">
+        </div>
+
         <h2>What do you need help with?</h2>
+
         <div class="suggestions">
           <button data-prompt="Explain fractions for my year level">Explain fractions</button>
           <button data-prompt="Quiz me on photosynthesis">Quiz photosynthesis</button>
-          <button data-prompt="Help me write an essay introduction">Essay introduction</button>
+          <button data-prompt="Help me write an essay introduction">Essay intro</button>
         </div>
-      </div>`;
+      </div>
+    `;
   }
+
   wirePromptButtons();
   await loadHistory();
+  
 }
-function promptSend(text){
+
+function promptSend(t){
   setPage("chat");
-  if(el("message")) el("message").value = text;
+  if(el("message")) el("message").value = t;
   send();
 }
+
 async function send(){
-  const message = value("message");
-  if(!message) return;
+  const m = value("message");
+  if(!m) return;
+
   if(!currentConversationId){
-    const created = await post("/api/conversations",{subject:value("subject")},true);
-    if(created.error) return alert(created.error);
+    const created = await post("/api/conversations", {
+      subject: value("subject")
+    }, true);
+
+    if(created.error){
+      alert(created.error);
+      return;
+    }
+
     currentConversationId = created.conversation.id;
   }
+
   if(el("message")) el("message").value = "";
   document.querySelector(".empty")?.remove();
-  addMsg("user",message);
-  const waitingId = addMsg("bot","StudyCoach AI is thinking...");
-  const d = await post("/api/chat",{
-    message,
-    subject:value("subject"),
-    yearLevel:value("appYear"),
-    country:currentUser?.country || "New Zealand",
-    conversationId:currentConversationId
-  },true);
-  const box = document.querySelector("#"+waitingId+" .text");
-  if(box) box.textContent = d.answer || d.error || "No answer.";
+
+  addMsg("user", m);
+  const wait = addMsg("bot", "🟢 StudyCoach AI is thinking...");
+
+  const d = await post("/api/chat", {
+    message: m,
+    subject: value("subject"),
+    yearLevel: value("appYear"),
+    country: currentUser?.country || "New Zealand",
+    conversationId: currentConversationId
+  }, true);
+
+  const textBox = document.querySelector("#" + wait + " .text");
+
+  if(textBox){
+    textBox.textContent = d.answer || d.error || "No answer.";
+  }
+
   await loadHistory();
   await loadDashboard();
 }
-function addMsg(role,text){
-  const id = "m"+Date.now()+Math.random().toString(16).slice(2);
+
+function addMsg(role, text){
+  const mid = "m" + Date.now() + Math.random().toString(16).slice(2);
   const div = document.createElement("div");
-  div.id = id;
+  div.id = mid;
   div.className = "msg " + (role === "user" ? "user" : "bot");
-  div.innerHTML = `<div class="inner"><div class="text">${escapeHtml(text)}</div></div>`;
+  div.innerHTML = `
+    <div class="inner">
+    <div class="avatar">
+  ${role === "user" ? "👤" : "🤖"}
+</div>
+      <div class="text">${escapeHtml(text)}</div>
+    </div>`;
+
   el("messages")?.appendChild(div);
   if(el("messages")) el("messages").scrollTop = el("messages").scrollHeight;
-  return id;
+  return mid;
 }
-async function loadHistory(){
-  if(!token || !el("history")) return;
+
+async function loadHistory() {
+  if (!token || !el("history")) return;
+
   const d = await get("/api/conversations");
+
+  if (d.error) {
+    console.error("Conversation history error:", d.error);
+    el("history").innerHTML = `
+      <p style="color:#f87171;font-size:13px;">
+        ${escapeHtml(d.error)}
+      </p>
+    `;
+    return;
+  }
+
   const conversations = d.conversations || [];
-  if(!conversations.length){
+
+  if (conversations.length === 0) {
     el("history").innerHTML = "<p>No chats yet.</p>";
     return;
   }
+
   el("history").innerHTML = conversations.map(c => `
-    <div class="history-row">
-      <button class="hist" onclick="openConversation('${c.id}')">${escapeHtml(c.title || "New chat")}</button>
-      <button class="delete-chat" onclick="deleteConversation('${c.id}',event)">×</button>
-    </div>`).join("");
+    <div class="history-row ${c.id === currentConversationId ? "active" : ""}">
+      <button
+        class="hist"
+        onclick="openConversation('${c.id}')">
+        ${escapeHtml(c.title || "New chat")}
+      </button>
+
+      <button
+        class="delete-chat"
+        onclick="deleteConversation('${c.id}', event)"
+        aria-label="Delete chat">
+        ×
+      </button>
+    </div>
+  `).join("");
+
+  if (!currentConversationId) {
+    await openConversation(conversations[0].id);
+  }
 }
 async function openConversation(id){
+
   currentConversationId = id;
+
   setPage("chat");
-  const d = await get("/api/conversations/"+id+"/messages");
-  if(d.error) return alert(d.error);
-  if(el("messages")) el("messages").innerHTML = "";
-  (d.messages || []).forEach(m => addMsg(m.role === "assistant" ? "bot" : "user",m.content));
-}
-async function deleteConversation(id,event){
-  event?.stopPropagation();
-  if(!confirm("Delete this chat permanently?")) return;
-  const d = await del("/api/conversations/"+id);
-  if(d.error) return alert(d.error);
-  if(currentConversationId === id){
-    currentConversationId = null;
-    if(el("messages")) el("messages").innerHTML = "<div class='empty'><h2>What do you need help with?</h2></div>";
+
+  const d = await get("/api/conversations/" + id + "/messages");
+
+  if(d.error){
+    alert(d.error);
+    return;
   }
+
+  if(el("messages")){
+    el("messages").innerHTML = "";
+  }
+
+  (d.messages || []).forEach(m => {
+
+    addMsg(
+      m.role === "assistant" ? "bot" : "user",
+      m.content
+    );
+
+  });
+
+}
+async function deleteConversation(id, event) {
+  event?.stopPropagation();
+
+  const confirmed = confirm("Delete this chat permanently?");
+  if (!confirmed) return;
+
+  const d = await del("/api/conversations/" + id);
+
+  if (d.error) {
+    alert(d.error);
+    return;
+  }
+
+  if (currentConversationId === id) {
+    currentConversationId = null;
+
+    if (el("messages")) {
+      el("messages").innerHTML = `
+        <div class="empty">
+          <div class="logo big">
+            <img src="/images/logo.svg" alt="StudyCoach AI">
+          </div>
+          <h2>What do you need help with?</h2>
+        </div>
+      `;
+    }
+  }
+
   await loadHistory();
 }
-
 async function loadDashboard(){
   if(!token) return;
-  const progress = await get("/api/progress");
-  const profile = await get("/api/profile");
-  const analytics = progress.analytics || {};
-  const xp = progress.xp || 0;
-  const level = progress.level || 1;
-  const nextLevelXp = level * 100;
-  const xpPercent = Math.min(100,Math.round((xp / nextLevelXp)*100));
-  const name = currentUser?.name || "student";
-  if(!el("dashboardPage")) return;
 
-  el("dashboardPage").innerHTML = `
+  const d = await get("/api/progress");
+  const profileData = await get("/api/profile");
+
+  const analytics = d.analytics || {};
+  const dailyCoach = profileData.dailyCoach || "Keep going — complete one study task today!";
+
+  const hours = Math.round((d.estimatedStudyMinutes || 0) / 60);
+  const progress = d.progressPercent || 0;
+  const name = currentUser?.name || "student";
+
+  const xp = d.xp || 0;
+  const level = d.level || 1;
+  const nextLevelXp = level * 100;
+  const currentLevelStart = (level - 1) * 100;
+  const xpIntoLevel = xp - currentLevelStart;
+  const xpNeeded = nextLevelXp - currentLevelStart;
+  const xpPercent = Math.min(100, Math.round((xpIntoLevel / xpNeeded) * 100));
+
+  const chatCount = analytics.chatCount || 0;
+  const quizAnswers = analytics.quizAnswerCount || 0;
+  const homeworkCount = analytics.homeworkAverage || 0;
+
+  const dailyChallenges = [
+    { icon:"💬", title:"Ask 3 AI questions", progress:Math.min(3, chatCount), target:3 },
+    { icon:"🧠", title:"Answer 3 quiz questions", progress:Math.min(3, quizAnswers), target:3 },
+    { icon:"📄", title:"Upload 1 homework task", progress:Math.min(1, homeworkCount), target:1 }
+  ];
+
+  const dash = el("dashboardPage");
+  if(!dash) return;
+
+  dash.innerHTML = `
     <div class="dash-hero-pro">
       <div>
         <p class="eyebrow">StudyCoach AI</p>
@@ -265,450 +483,848 @@ async function loadDashboard(){
       </div>
       <button onclick="newChat()">Start studying</button>
     </div>
+
     <div class="dash-top-grid">
       <div class="dash-main-card">
         <p class="eyebrow">Current Level</p>
         <h2>⭐ Level ${level}</h2>
-        <p><b>${xp}</b> / ${nextLevelXp} XP</p>
-        <div class="progress-track"><div class="progress-fill" style="width:${xpPercent}%"></div></div>
+     <p><b id="dashXp">0</b> / ${nextLevelXp} XP</p>
+        <div class="progress-track">
+      <div id="xpBarFill" class="progress-fill" style="width:0%"></div>
+        </div>
       </div>
-      <div class="dash-mini-card"><h3>🔥 ${progress.streak || 0}</h3><p>Day streak</p></div>
-      <div class="dash-mini-card"><h3>📚 ${progress.total || 0}</h3><p>Study tasks</p></div>
-      <div class="dash-mini-card"><h3>🎯 ${progress.progressPercent || 0}%</h3><p>Weekly goal</p></div>
+<div class="dash-mini-card"><span>🔥</span><h3 id="dashStreakNum">0</h3><p>Day streak</p></div>
+<div class="dash-mini-card"><span>📚</span><h3 id="dashTasksNum">0</h3><p>Study tasks</p></div>
+<div class="dash-mini-card"><span>🎯</span><h3 id="dashGoalNum">0%</h3><p>Weekly goal</p></div>
     </div>
+
     <div class="dashboard-grid">
-      <div class="panel">
-        <h3>Quick actions</h3>
-        <div class="flash-actions">
-          <button onclick="newChat()">AI Tutor</button>
-          <button onclick="setPage('quiz')">Quiz</button>
-          <button onclick="setPage('flashcards')">Flashcards</button>
-          <button onclick="setPage('plan')">Study plan</button>
+      <div class="panel big-panel">
+        <h3>🎯 Today's Mission</h3>
+        <div class="mission-list">
+          <div>☐ Ask the AI one study question</div>
+          <div>☐ Complete one quiz or flashcard set</div>
+          <div>☐ Study for 20 minutes</div>
         </div>
       </div>
-      <div class="panel">
-        <h3>Analytics</h3>
+
+<div class="panel">
+  <div class="daily-reward-card">
+  <div class="reward-icon">🎁</div>
+  <div>
+    <h3>Daily Reward</h3>
+    <p>${d.claimedToday ? "Reward claimed today." : "Claim your daily +25 XP bonus."}</p>
+    <button id="claimRewardBtn" onclick="claimDailyReward()" ${d.claimedToday ? "disabled" : ""}>
+      ${d.claimedToday ? "✅ Come back tomorrow" : "🎁 Claim +25 XP"}
+    </button>
+  </div>
+</div>
+
+      <div class="panel big-panel">
+        <h3>🏆 Daily Challenges</h3>
+        <div class="challenge-list">
+          ${dailyChallenges.map(c => `
+            <div class="challenge-row">
+              <span>${c.icon}</span>
+              <div>
+                <b>${c.title}</b>
+                <p>${c.progress} / ${c.target} complete</p>
+                <div class="challenge-track">
+                  <div class="challenge-fill" style="width:${Math.round((c.progress / c.target) * 100)}%"></div>
+                </div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="panel big-panel">
+        <h3>📊 Analytics</h3>
         <div class="analytics-grid">
-          <div><h2>${analytics.studyTasks || 0}</h2><p>Tasks</p></div>
-          <div><h2>${analytics.quizCount || 0}</h2><p>Quizzes</p></div>
-          <div><h2>${analytics.homeworkAverage || 0}</h2><p>Homework</p></div>
-          <div><h2>${analytics.flashcardCount || 0}</h2><p>Flashcards</p></div>
+          <div class="analytics-card"><span>📚</span><h2>${analytics.studyTasks || 0}</h2><p>Total Tasks</p></div>
+          <div class="analytics-card"><span>🧪</span><h2>${analytics.quizCount || 0}</h2><p>Quizzes</p></div>
+          <div class="analytics-card"><span>📄</span><h2>${analytics.homeworkAverage || 0}</h2><p>Homework</p></div>
+          <div class="analytics-card"><span>🃏</span><h2>${analytics.flashcardCount || 0}</h2><p>Flashcards</p></div>
         </div>
       </div>
+
       <div class="panel">
-        <h3>AI Daily Coach</h3>
-        <p>${escapeHtml(profile.dailyCoach || "Complete one study task today.")}</p>
+        <h3>🤖 AI Daily Coach</h3>
+        <pre class="coach-text">${escapeHtml(dailyCoach)}</pre>
       </div>
-    </div>`;
+
+      <div class="panel">
+        <h3>⚡ Quick Actions</h3>
+        <div class="quick">
+          <button data-prompt="Explain fractions for my year level">Explain fractions</button>
+          <button data-prompt="Quiz me on photosynthesis">Quiz photosynthesis</button>
+          <button onclick="setPage('tools')">Open quiz tools</button>
+          <button onclick="setPage('profile')">View AI profile</button>
+        </div>
+      </div>
+    </div>
+  `;
+function animateNumber(id, end, suffix = ""){
+  const node = el(id);
+  if(!node) return;
+
+  let start = 0;
+  const duration = 800;
+  const startTime = performance.now();
+
+  function tick(now){
+    const progress = Math.min((now - startTime) / duration, 1);
+    const value = Math.round(start + (end - start) * progress);
+    node.textContent = value + suffix;
+
+    if(progress < 1) requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+}
+  animateNumber("dashXp", xp);
+animateNumber("dashStreakNum", d.streak || 0);
+animateNumber("dashTasksNum", d.total || 0);
+animateNumber("dashGoalNum", progress, "%");
+  
+  setTimeout(() => {
+  const bar = el("xpBarFill");
+  if (bar) {
+    bar.style.width = xpPercent + "%";
+  }
+}, 200);
+  wirePromptButtons();
+}
+async function loadProgress(){
+  setPage("progress");
+  const d = await get("/api/progress");
+  const badges = (d.badges || [])
+    .map(b => `<span class="badge">${escapeHtml(b)}</span>`)
+    .join("") || "No badges yet.";
+
+  if(el("progressOut")){
+    el("progressOut").innerHTML = `
+      <h3>Total study tasks: ${d.total || 0}</h3>
+      <p><b>Streak:</b> ${d.streak || 0} days</p>
+      <h3>By subject</h3>
+      <pre>${escapeHtml(JSON.stringify(d.bySubject || {}, null, 2))}</pre>
+      <h3>Badges</h3>
+      <div>${badges}</div>`;
+  }
+}
+async function loadProfile() {
+  setPage("profile");
+
+  const d = await get("/api/profile");
+  const progressData = await get("/api/progress");
+  const currentStreak = progressData.currentStreak || 0;
+const bestStreak = progressData.bestStreak || 0;
+const studyDates = progressData.studyDates || [];
+const achievementData = await get("/api/achievements");
+const earnedAchievements = achievementData.achievements || [];
+ const today = new Date();
+  const todayKey = today.toISOString().slice(0, 10);
+const monthLabel = today.toLocaleDateString("en-NZ", {
+  month: "long",
+  year: "numeric"
+});
+const calendarDays = [];
+
+const startDate = new Date(today);
+const dayOfWeek = startDate.getDay(); // Sun=0, Mon=1
+const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+startDate.setDate(today.getDate() - mondayOffset - 21);
+
+for (let i = 0; i < 28; i++) {
+const d = new Date(startDate);
+d.setDate(startDate.getDate() + i);
+  const dateKey = d.toISOString().slice(0, 10);
+
+ calendarDays.push({
+  day: d.getDate(),
+  dateKey,
+  studied: studyDates.includes(dateKey),
+  isToday: dateKey === todayKey
+});
+}
+const allAchievements = [
+  {
+    key: "first-ai-question",
+    icon: "💬",
+    title: "First AI Question",
+    description: "Ask your first AI question."
+  },
+  
+  {
+    key: "first-quiz-answer",
+    icon: "🧠",
+    title: "First Quiz Answer",
+    description: "Answer your first quiz question."
+  },
+  {
+    key: "first-flashcards",
+    icon: "🃏",
+    title: "First Flashcards",
+    description: "Create your first flashcard set."
+  },
+  {
+    key: "first-homework",
+    icon: "📄",
+    title: "First Homework Upload",
+    description: "Upload your first homework."
+  },
+  {
+    key: "study-starter",
+    icon: "🚀",
+    title: "Study Starter",
+    description: "Complete 10 study activities."
+  }
+];
+  if (d.error) {
+    el("profileOut").innerHTML = `<p>${escapeHtml(d.error)}</p>`;
+    return;
+  }
+
+  const p = d.profile || {};
+  const xp = d.xp || 0;
+  const level = d.level || 1;
+  const nextLevelXp = level * 100;
+  const xpPercent = Math.min(100, Math.round((xp / nextLevelXp) * 100));
+
+  el("profileOut").innerHTML = `
+    <div class="profile-hero">
+      <div>
+        <p class="eyebrow">AI Student Memory</p>
+        <h1>🧠 ${escapeHtml(p.name || currentUser?.name || "Student")}</h1>
+        <p>${escapeHtml(p.year_level || currentUser?.yearLevel || "Year level")} • ${escapeHtml(p.country || currentUser?.country || "New Zealand")}</p>
+      </div>
+      <div class="profile-level">
+        <h2>⭐ Level ${level}</h2>
+        <p>${xp} XP</p>
+      </div>
+    </div>
+
+    <div class="level-card">
+      <p class="eyebrow">Progress to Level ${level + 1}</p>
+      <div class="progress-track">
+        <div class="progress-fill" style="width:${xpPercent}%"></div>
+      </div>
+      <p><b>${xp}</b> / ${nextLevelXp} XP</p>
+    </div>
+
+    <div class="profile-grid">
+      <div class="panel">
+        <h3>📚 Learning Profile</h3>
+        <p><b>Favourite Subject:</b> ${escapeHtml(p.favourite_subject || "Not learned yet")}</p>
+        <p><b>Weak Subject:</b> ${escapeHtml(p.weak_subject || "Not learned yet")}</p>
+        <p><b>Weak Topics:</b> ${escapeHtml(p.weak_topics || "None yet")}</p>
+        <p><b>Recently Learned:</b> ${escapeHtml(p.recently_learned || "Nothing yet")}</p>
+      </div>
+
+      <div class="panel">
+        <h3>🧠 AI Brain</h3>
+        <p><b>Learning Style:</b> ${escapeHtml(p.learning_style || "Still learning")}</p>
+        <p><b>Memory Notes:</b></p>
+        <p>${escapeHtml(p.memory_notes || "The AI is still learning about this student.")}</p>
+      </div>
+
+      <div class="panel">
+        <h3>🎯 Goals</h3>
+        <p>${escapeHtml(p.goals || "Build strong study habits")}</p>
+      </div>
+
+      <div class="panel">
+        <h3>📊 Scores</h3>
+        <p><b>Homework Average:</b> ${p.homework_average || 0}/10</p>
+        <p><b>Quiz Average:</b> ${p.quiz_average || 0}/10</p>
+      </div>
+    </div>
+    
+<div class="panel">
+<h3>🔥 Study Streak Calendar</h3>
+
+<h4 class="calendar-month">${monthLabel}</h4>
+<div class="streak-stats">
+  <div class="streak-stat">
+    <h2>🔥 ${currentStreak}</h2>
+    <p>Current Streak</p>
+  </div>
+
+  <div class="streak-stat">
+    <h2>🏆 ${bestStreak}</h2>
+    <p>Best Streak</p>
+  </div>
+</div>
+<div class="streak-weekdays">
+  <span>Mon</span>
+  <span>Tue</span>
+  <span>Wed</span>
+  <span>Thu</span>
+  <span>Fri</span>
+  <span>Sat</span>
+  <span>Sun</span>
+</div>
+
+<div class="streak-calendar">
+    ${calendarDays.map(d => `
+    <div class="streak-day ${d.studied ? "studied" : ""} ${d.isToday ? "today" : ""}" title="${d.dateKey}">
+  ${d.day}
+</div>
+    `).join("")}
+  </div>
+</div>
+
+  <div class="panel">
+  <h3>🏆 Achievement Gallery</h3>
+
+  <div class="achievement-gallery">
+    ${allAchievements.map(a => {
+      const earned = earnedAchievements.find(e => e.achievement_key === a.key);
+
+      return `
+        <div class="achievement-card ${earned ? "unlocked" : "locked"}">
+          <div class="achievement-icon">${earned ? a.icon : "🔒"}</div>
+          <h4>${escapeHtml(a.title)}</h4>
+          <p>${escapeHtml(a.description)}</p>
+          <span>${earned ? "Unlocked" : "Locked"}</span>
+        </div>
+      `;
+    }).join("")}
+  </div>
+</div>
+  `;
+}
+async function loadParent(){
+  if(!requirePremium("Parent dashboard")) return;
+  
+  setPage("parent");
+  const d = await get("/api/progress");
+
+  if(el("parentOut")){
+    el("parentOut").innerHTML = `
+      <h3>Parent summary</h3>
+      <p><b>Total tasks:</b> ${d.total || 0}</p>
+      <p><b>Study streak:</b> ${d.streak || 0} days</p>`;
+  }
 }
 
 async function makePlan(){
-  const d = await post("/api/study-plan",{goal:value("planGoal"),subject:value("subject"),days:value("planDays")},true);
+  const d = await post("/api/study-plan", {
+    goal: value("planGoal"),
+    subject: value("subject"),
+    days: value("planDays")
+  }, true);
+
   if(d.error){
     if(el("planOut")) el("planOut").textContent = d.error;
     return;
   }
+
   if(el("planOut")){
-    el("planOut").textContent = `Goal: ${d.plan.goal}\n\n` + d.plan.days.map(x => `Day ${x.day}: ${x.task} (${x.minutes} min)`).join("\n");
+    el("planOut").textContent = `Goal: ${d.plan.goal}\n\n` +
+      d.plan.days.map(x => `Day ${x.day}: ${x.task} (${x.minutes} min)`).join("\n");
   }
+
   await loadDashboard();
 }
 
+let currentQuiz = [];
+let currentQuizIndex = 0;
+
 async function makeQuiz(){
-  const d = await post("/api/quiz",{topic:value("quizTopic"),subject:value("subject")},true);
+  const d = await post("/api/quiz",{
+    topic: value("quizTopic"),
+    subject: value("subject")
+  }, true);
+
   if(d.error){
     if(el("quizOut")) el("quizOut").textContent = d.error;
     return;
   }
-  currentQuiz = d.quiz?.questions || [];
+
+  currentQuiz = d.quiz.questions || [];
   currentQuizIndex = 0;
+
   showQuizQuestion();
   await loadDashboard();
 }
+
 function showQuizQuestion(){
   if(!el("quizOut")) return;
-  if(!currentQuiz.length){
+
+  if(currentQuiz.length === 0){
     el("quizOut").innerHTML = "<p>No quiz questions found.</p>";
     return;
   }
-  const question = currentQuiz[currentQuizIndex];
+
+  const q = currentQuiz[currentQuizIndex];
+
   el("quizOut").innerHTML = `
     <div class="quiz-card">
-      <p class="eyebrow">Question ${currentQuizIndex+1} of ${currentQuiz.length}</p>
-      <h2>${escapeHtml(question)}</h2>
+      <p class="eyebrow">Question ${currentQuizIndex + 1} of ${currentQuiz.length}</p>
+      <h2>${escapeHtml(q)}</h2>
+
       <textarea id="quizAnswer" placeholder="Type your answer here..."></textarea>
+
       <div class="quiz-actions">
         <button onclick="checkQuizAnswer()">Check answer</button>
         <button class="secondary" onclick="nextQuizQuestion()">Skip</button>
       </div>
+
       <div id="quizFeedback"></div>
-    </div>`;
+    </div>
+  `;
 }
+
 async function checkQuizAnswer(){
   const answer = value("quizAnswer");
-  const question = currentQuiz[currentQuizIndex];
+  const q = currentQuiz[currentQuizIndex];
+
   if(!answer){
-    if(el("quizFeedback")) el("quizFeedback").innerHTML = "<p>Please type an answer first.</p>";
+    el("quizFeedback").innerHTML = "<p>Please type an answer first.</p>";
     return;
   }
-  if(el("quizFeedback")) el("quizFeedback").innerHTML = "<p>Checking answer...</p>";
-  const d = await post("/api/check-quiz-answer",{question,answer,subject:value("subject"),yearLevel:value("appYear")},true);
-  if(el("quizFeedback")){
-    el("quizFeedback").innerHTML = d.error
-      ? `<p>${escapeHtml(d.error)}</p>`
-      : `<div class="feedback-card">${escapeHtml(d.result)}</div>`;
+
+  el("quizFeedback").innerHTML = "<p>Checking answer...</p>";
+
+  const d = await post("/api/check-quiz-answer", {
+    question: q,
+    answer,
+    subject: value("subject"),
+    yearLevel: value("appYear")
+  }, true);
+
+  if(d.error){
+    el("quizFeedback").innerHTML = `<p>${escapeHtml(d.error)}</p>`;
+    return;
   }
-  await loadDashboard();
+
+  el("quizFeedback").innerHTML = `
+    <div class="feedback-good">
+      ${escapeHtml(d.result)}
+    </div>
+  `;
+ await loadDashboard();
+setPage("tools");
+
+showAchievement(
+  "🎉 +10 XP Earned!",
+  "Great work! Your dashboard and level have been updated."
+);
 }
+
 function nextQuizQuestion(){
   currentQuizIndex++;
+
   if(currentQuizIndex >= currentQuiz.length){
     el("quizOut").innerHTML = `
       <div class="quiz-card">
         <h2>🎉 Quiz complete!</h2>
         <p>You worked through ${currentQuiz.length} questions.</p>
         <button onclick="makeQuiz()">Try again</button>
-      </div>`;
+      </div>
+    `;
     return;
   }
+
   showQuizQuestion();
 }
 
-function normaliseFlashcards(data){
-  const cards = data?.flashcards?.cards || data?.cards || data?.flashcards || [];
-  if(!Array.isArray(cards)) return [];
-  return cards.map(card => {
-    if(typeof card === "string"){
-      const parts = card.split(":");
-      return {front:(parts.shift() || "Question").trim(),back:parts.join(":").trim() || "Answer"};
-    }
-    return {
-      front:String(card?.front ?? card?.question ?? card?.term ?? "").trim(),
-      back:String(card?.back ?? card?.answer ?? card?.definition ?? "").trim()
-    };
-  }).filter(card => card.front && card.back);
-}
+ 
 async function makeFlash(){
-  const topic = value("flashTopic");
-  if(!topic){
-    el("flashOut")?.classList.remove("hidden");
-    if(el("flashOut")) el("flashOut").textContent = "Please enter a flashcard topic first.";
-    return;
-  }
-  el("flashLoading")?.classList.remove("hidden");
-  el("flashcardStudyArea")?.classList.add("hidden");
-  const d = await post("/api/flashcards",{topic,subject:value("subject"),yearLevel:value("appYear")},true);
-  el("flashLoading")?.classList.add("hidden");
+  const d = await post("/api/flashcards", {
+    topic: value("flashTopic"),
+    subject: value("subject")
+  }, true);
+
   if(d.error){
-    el("flashOut")?.classList.remove("hidden");
     if(el("flashOut")) el("flashOut").textContent = d.error;
     return;
   }
-  currentFlashcards = normaliseFlashcards(d);
-  currentFlashcardIndex = 0;
-  flashcardShowingBack = false;
-  if(!currentFlashcards.length){
-    el("flashOut")?.classList.remove("hidden");
-    if(el("flashOut")) el("flashOut").textContent = "No usable flashcards were returned.";
-    return;
+
+  if(el("flashOut")){
+    el("flashOut").textContent = d.flashcards.cards
+      .map(c => `${c.front}: ${c.back}`)
+      .join("\n\n");
   }
-  el("flashOut")?.classList.add("hidden");
-  el("flashcardStudyArea")?.classList.remove("hidden");
-  renderFlashcard();
+
   await loadDashboard();
-}
-function renderFlashcard(){
-  if(!currentFlashcards.length) return;
-  const card = currentFlashcards[currentFlashcardIndex];
-  if(el("flashFrontText")) el("flashFrontText").textContent = card.front;
-  if(el("flashBackText")) el("flashBackText").textContent = card.back;
-  if(el("flashCounter")) el("flashCounter").textContent = `Card ${currentFlashcardIndex+1} of ${currentFlashcards.length}`;
-  if(el("flashProgressFill")) el("flashProgressFill").style.width = `${((currentFlashcardIndex+1)/currentFlashcards.length)*100}%`;
-  if(el("previousFlashcard")) el("previousFlashcard").disabled = currentFlashcardIndex === 0;
-  if(el("nextFlashcard")) el("nextFlashcard").textContent = currentFlashcardIndex === currentFlashcards.length-1 ? "Finish ✓" : "Next →";
-  flashcardShowingBack = false;
-  el("studyFlashcard")?.classList.remove("flipped");
-  el("flashExplainOut")?.classList.add("hidden");
-}
-function flipCurrentFlashcard(){
-  if(!currentFlashcards.length) return;
-  flashcardShowingBack = !flashcardShowingBack;
-  el("studyFlashcard")?.classList.toggle("flipped",flashcardShowingBack);
-}
-function nextFlashcard(){
-  if(!currentFlashcards.length) return;
-  if(currentFlashcardIndex < currentFlashcards.length-1){
-    currentFlashcardIndex++;
-    renderFlashcard();
-  }else{
-    showAchievement("🎉 Flashcard set complete!",`You studied ${currentFlashcards.length} flashcards.`);
-    currentFlashcardIndex = 0;
-    renderFlashcard();
-  }
-}
-function previousFlashcard(){
-  if(currentFlashcardIndex <= 0) return;
-  currentFlashcardIndex--;
-  renderFlashcard();
-}
-function shuffleFlashcards(){
-  for(let i=currentFlashcards.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [currentFlashcards[i],currentFlashcards[j]] = [currentFlashcards[j],currentFlashcards[i]];
-  }
-  currentFlashcardIndex = 0;
-  renderFlashcard();
-}
-function readCurrentFlashcard(){
-  if(!currentFlashcards.length) return alert("Create some flashcards first.");
-  if(!("speechSynthesis" in window)) return alert("Read aloud is not supported in this browser.");
-  speechSynthesis.cancel();
-  const card = currentFlashcards[currentFlashcardIndex];
-  const speech = new SpeechSynthesisUtterance(flashcardShowingBack ? card.back : card.front);
-  speech.lang = "en-NZ";
-  speech.rate = .95;
-  speechSynthesis.speak(speech);
-}
-async function explainCurrentFlashcard(){
-  if(!currentFlashcards.length) return alert("Create some flashcards first.");
-  const out = el("flashExplainOut");
-  const card = currentFlashcards[currentFlashcardIndex];
-  if(!out) return;
-  out.classList.remove("hidden");
-  out.innerHTML = "<p>StudyCoach AI is explaining this card...</p>";
-  const d = await post("/api/chat",{
-    message:`Explain this flashcard clearly for ${value("appYear")}.\nQuestion: ${card.front}\nAnswer: ${card.back}\nGive a short explanation and one example.`,
-    subject:value("subject"),
-    yearLevel:value("appYear"),
-    country:currentUser?.country || "New Zealand",
-    conversationId:currentConversationId
-  },true);
-  out.innerHTML = d.error
-    ? `<p>${escapeHtml(d.error)}</p>`
-    : `<div class="flashcard-explanation"><h3>AI Explanation</h3><p>${escapeHtml(d.answer || "No explanation returned.")}</p></div>`;
-}
-function handleFlashcardKeyboard(event){
-  if(!el("flashcardsPage")?.classList.contains("active") || !currentFlashcards.length) return;
-  const tag = document.activeElement?.tagName?.toLowerCase();
-  if(["input","textarea","select"].includes(tag)) return;
-  if(event.key === "ArrowRight"){ event.preventDefault(); nextFlashcard(); }
-  if(event.key === "ArrowLeft"){ event.preventDefault(); previousFlashcard(); }
-  if(event.key === " " || event.key === "Enter"){ event.preventDefault(); flipCurrentFlashcard(); }
-}
-function handleFlashcardTouchStart(event){ flashcardTouchStartX = event.changedTouches?.[0]?.screenX || 0; }
-function handleFlashcardTouchEnd(event){
-  const endX = event.changedTouches?.[0]?.screenX || 0;
-  const diff = endX - flashcardTouchStartX;
-  if(Math.abs(diff) < 50) return;
-  diff < 0 ? nextFlashcard() : previousFlashcard();
 }
 
 async function uploadHomework(){
-  const file = el("homeworkFile")?.files?.[0];
+
+  // Remove this line temporarily while we build the feature.
+  // if(!requirePremium("Homework upload")) return;
+
+  const fileBox = el("homeworkFile");
+  const noteBox = el("homeworkNote");
   const out = el("uploadOut");
+
+  const file = fileBox?.files?.[0];
+
   if(!file){
-    if(out) out.textContent = "Please choose a homework file first.";
+    out.textContent = "Please choose a homework file first.";
     return;
   }
-  if(out) out.textContent = "Uploading...";
+
+  out.textContent = "Uploading...";
+
   const form = new FormData();
-  form.append("file",file);
-  form.append("note",value("homeworkNote"));
-  try{
-    const response = await fetch("/api/upload-homework",{method:"POST",headers:{Authorization:"Bearer "+token},body:form});
-    const d = await response.json();
-    if(d.error){
-      if(out) out.textContent = d.error;
-      return;
-    }
-    if(out) out.innerHTML = `<div class="feedback-card"><h2>Homework Assessment</h2><pre>${escapeHtml(d.message || "")}</pre></div>`;
-    await loadDashboard();
-  }catch(err){
-    if(out) out.textContent = "Upload failed: " + err.message;
-  }
-}
-function startVoice(){
-  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!Recognition) return alert("Voice input is not supported in this browser. Try Chrome.");
-  const recognition = new Recognition();
-  recognition.lang = "en-NZ";
-  recognition.onresult = event => {
-    if(el("message")) el("message").value = event.results[0][0].transcript;
-  };
-  recognition.start();
-}
-async function loadProgress(){
-  setPage("progress");
-  const d = await get("/api/progress");
-  if(el("progressOut")){
-    el("progressOut").innerHTML = `
-      <h1>Progress</h1>
-      <p><b>Total study tasks:</b> ${d.total || 0}</p>
-      <p><b>Study streak:</b> ${d.streak || 0} days</p>
-      <h3>By subject</h3>
-      <pre>${escapeHtml(JSON.stringify(d.bySubject || {},null,2))}</pre>`;
-  }
-}
-async function loadProfile(){
-  setPage("profile");
-  const d = await get("/api/profile");
+  form.append("file", file);
+  form.append("note", noteBox?.value || "");
+
+ // Use the global token variable that's already loaded
+
+  const r = await fetch("/api/upload-homework", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + token
+    },
+    body: form
+  });
+
+  const d = await r.json();
+
   if(d.error){
-    if(el("profileOut")) el("profileOut").innerHTML = `<div class="panel">${escapeHtml(d.error)}</div>`;
+  out.textContent = d.error;
+  return;
+}
+
+const txt = d.message || "";
+
+const get = (heading) => {
+  const match = txt.match(
+    new RegExp(heading + ":\\s*([\\s\\S]*?)(?=SCORE:|STRENGTHS:|IMPROVEMENTS:|REVISION:|NEXT_STEPS:|$)")
+  );
+  return match ? match[1].trim() : "";
+};
+
+out.innerHTML = `
+<div class="feedback-card">
+
+<h2>📄 Homework Assessment</h2>
+
+<div class="score-box">
+<h1>⭐ ${get("SCORE")}</h1>
+</div>
+
+<div class="feedback-section">
+<h3>✅ Strengths</h3>
+<ul>
+${get("STRENGTHS").split("\n").map(x=>`<li>${x.replace("-","").trim()}</li>`).join("")}
+</ul>
+</div>
+
+<div class="feedback-section">
+<h3>⚠️ Improvements</h3>
+<ul>
+${get("IMPROVEMENTS").split("\n").map(x=>`<li>${x.replace("-","").trim()}</li>`).join("")}
+</ul>
+</div>
+
+<div class="feedback-section">
+<h3>📚 Revision</h3>
+<ul>
+${get("REVISION").split("\n").map(x=>`<li>${x.replace("-","").trim()}</li>`).join("")}
+</ul>
+</div>
+
+<div class="feedback-section">
+<h3>🎯 Next Steps</h3>
+<ul>
+${get("NEXT_STEPS").split("\n").map(x=>`<li>${x.replace("-","").trim()}</li>`).join("")}
+</ul>
+</div>
+
+</div>
+`;
+  
+}
+
+
+function startVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if(!SR){
+    alert("Voice input is not supported in this browser. Try Chrome.");
     return;
   }
-  const p = d.profile || {};
-  if(el("profileOut")){
-    el("profileOut").innerHTML = `
-      <div class="panel">
-        <p class="eyebrow">AI Student Memory</p>
-        <h1>${escapeHtml(p.name || currentUser?.name || "Student")}</h1>
-        <div class="profile-grid">
-          <div><h3>Favourite subject</h3><p>${escapeHtml(p.favourite_subject || "Not learned yet")}</p></div>
-          <div><h3>Weak topics</h3><p>${escapeHtml(p.weak_topics || "None yet")}</p></div>
-          <div><h3>Learning style</h3><p>${escapeHtml(p.learning_style || "Still learning")}</p></div>
-          <div><h3>Goals</h3><p>${escapeHtml(p.goals || "Build strong study habits")}</p></div>
-        </div>
-      </div>`;
+
+  const rec = new SR();
+  rec.lang = "en-NZ";
+  rec.onresult = e => {
+    if(el("message")) el("message").value = e.results[0][0].transcript;
+  };
+  rec.start();
+}
+
+async function loadTeacher(){
+  if(!requirePremium("Teacher dashboard")) return;
+  
+  const d = await get("/api/teacher-summary");
+
+  if(el("teacherOut")){
+    el("teacherOut").textContent = (d.students || [])
+      .map(s => `${s.name} — ${s.yearLevel} — ${s.tasks} tasks — ${s.streak} day streak — ${s.plan}`)
+      .join("\n") || "No students yet.";
   }
 }
-function isPremium(){ return currentUser?.plan === "premium"; }
-function requirePremium(name){
+function isPremium(){
+  return currentUser && currentUser.plan === "premium";
+}
+
+function requirePremium(featureName){
   if(isPremium()) return true;
-  alert(name + " is a Premium feature.");
+
+  alert(featureName + " is a Premium feature. Please upgrade to unlock it.");
   setPage("pricing");
   return false;
 }
-async function loadParent(){
-  if(!requirePremium("Parent dashboard")) return;
-  setPage("parent");
-  const d = await get("/api/progress");
-  if(el("parentOut")) el("parentOut").innerHTML = `<h1>Parent summary</h1><p>Total tasks: ${d.total || 0}</p><p>Study streak: ${d.streak || 0} days</p>`;
-}
-async function loadTeacher(){
-  if(!requirePremium("Teacher dashboard")) return;
-  const d = await get("/api/teacher-summary");
-  if(el("teacherOut")) el("teacherOut").textContent = (d.students || []).map(s => `${s.name} — ${s.yearLevel} — ${s.tasks} tasks — ${s.streak} day streak — ${s.plan}`).join("\n") || "No students yet.";
-}
 async function startTrial(){
-  const d = await post("/api/start-trial",{},true);
-  if(d.error) return alert(d.error);
-  if(typeof gtag === "function"){
-    gtag("event","trial_started",{plan:"premium",trial_length_days:7,value:14.99,currency:"NZD"});
+
+  const d = await post("/api/start-trial", {}, true);
+
+  if(d.error){
+    alert(d.error);
+    return;
   }
-  alert("Your 7-day Premium Trial has started!");
-  const me = await get("/api/me");
-  if(me.user) currentUser = me.user;
+
+  // Track a successfully started trial
+  if(typeof gtag === "function"){
+    gtag("event", "trial_started", {
+      plan: "premium",
+      trial_length_days: 7,
+      value: 14.99,
+      currency: "NZD"
+    });
+  }
+
+  alert("🎉 Your 7-Day Premium Trial has started!");
+
   await loadDashboard();
+  await loadProfile();
+
+  const me = await get("/api/me");
+
+  if(me.user){
+    currentUser = me.user;
+  }
+
   setPage("pricing");
+  
 }
+
 async function stripeUpgrade(){
-  const d = await post("/api/create-checkout-session",{},true);
-  if(d.url) location.href = d.url;
-  else alert(d.error || "Stripe checkout failed.");
+  const d = await post("/api/create-checkout-session", {}, true);
+
+  if(d.url){
+    location.href = d.url;
+    return;
+  }
+
+  alert(d.error || "Stripe checkout failed.");
 }
-function showAchievement(title,message){
-  document.querySelector(".achievement-pop")?.remove();
+
+async function runDebug(){
+  const d = await fetch("/api/health")
+    .then(r => r.json())
+    .catch(e => ({ error: e.message }));
+
+  if(el("debugOut")){
+    el("debugOut").innerHTML = `<pre>${escapeHtml(JSON.stringify(d, null, 2))}</pre>`;
+  }
+}
+
+async function post(url, body, needsAuth) {
+  try {
+    const headers = {
+      "Content-Type": "application/json"
+    };
+
+    if (needsAuth) {
+      headers.Authorization = "Bearer " + token;
+    }
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body)
+    });
+
+    const rawText = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      return {
+        error:
+          `Server returned ${response.status} instead of JSON.\n\n` +
+          rawText.substring(0, 300)
+      };
+    }
+
+    return data;
+
+  } catch (err) {
+    return {
+      error: "Network/server error: " + err.message
+    };
+  }
+}
+async function del(url) {
+  try {
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        Authorization: "Bearer " + token
+      }
+    });
+
+    const rawText = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      return {
+        error: `Server returned ${response.status} instead of JSON.`
+      };
+    }
+
+    return data;
+  } catch (err) {
+    return {
+      error: "Network/server error: " + err.message
+    };
+  }
+}
+async function get(url) {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        Authorization: "Bearer " + token
+      }
+    });
+
+    const rawText = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      return {
+        error:
+          `Server returned ${response.status} instead of JSON.\n\n` +
+          rawText.substring(0, 300)
+      };
+    }
+
+    return data;
+
+  } catch (err) {
+    return {
+      error: "Network/server error: " + err.message
+    };
+  }
+}
+function showAchievement(title, message){
+  const old = document.querySelector(".achievement-pop");
+  if(old) old.remove();
+
   const pop = document.createElement("div");
   pop.className = "achievement-pop";
-  pop.innerHTML = `<div class="achievement-box"><h2>${escapeHtml(title)}</h2><p>${escapeHtml(message)}</p></div>`;
+
+  pop.innerHTML = `
+    <div class="achievement-box">
+      <h2>${escapeHtml(title)}</h2>
+      <p>${escapeHtml(message)}</p>
+    </div>
+  `;
+
   document.body.appendChild(pop);
-  setTimeout(() => pop.remove(),3500);
+
+  setTimeout(() => {
+    pop.remove();
+  }, 3500);
 }
 function wirePromptButtons(){
-  document.querySelectorAll("[data-prompt]").forEach(button => {
-    button.onclick = () => promptSend(button.getAttribute("data-prompt"));
+  document.querySelectorAll("[data-prompt]").forEach(btn => {
+    btn.onclick = () => promptSend(btn.getAttribute("data-prompt"));
   });
 }
 
-async function post(url,body,needsAuth){
-  try{
-    const headers = {"Content-Type":"application/json"};
-    if(needsAuth) headers.Authorization = "Bearer " + token;
-    const response = await fetch(url,{method:"POST",headers,body:JSON.stringify(body)});
-    const text = await response.text();
-    try{ return JSON.parse(text); }
-    catch{ return {error:`Server returned ${response.status} instead of JSON.\n${text.slice(0,300)}`}; }
-  }catch(err){
-    return {error:"Network/server error: "+err.message};
+document.addEventListener("DOMContentLoaded", () => {
+  function on(id, fn){
+    const x = el(id);
+    if(x) x.onclick = fn;
   }
-}
-async function get(url){
-  try{
-    const response = await fetch(url,{headers:{Authorization:"Bearer "+token}});
-    const text = await response.text();
-    try{ return JSON.parse(text); }
-    catch{ return {error:`Server returned ${response.status} instead of JSON.\n${text.slice(0,300)}`}; }
-  }catch(err){
-    return {error:"Network/server error: "+err.message};
-  }
-}
-async function del(url){
-  try{
-    const response = await fetch(url,{method:"DELETE",headers:{Authorization:"Bearer "+token}});
-    const text = await response.text();
-    try{ return JSON.parse(text); }
-    catch{ return {error:`Server returned ${response.status} instead of JSON.`}; }
-  }catch(err){
-    return {error:"Network/server error: "+err.message};
-  }
-}
 
-document.addEventListener("DOMContentLoaded",() => {
-  const on = (id,fn) => { if(el(id)) el(id).onclick = fn; };
+  function key(id, fn){
+    const x = el(id);
+    if(x) x.addEventListener("keydown", fn);
+  }
+
   fillYears("yearLevel");
   fillYears("appYear");
 
-  on("loginTop",showLogin);
-  on("startTop",showSignup);
-  on("startHero",showSignup);
-  on("pricingBtn",() => el("pricing")?.scrollIntoView({behavior:"smooth"}));
-  on("startFreePrice",showSignup);
-  on("premiumPrice",showSignup);
-  on("authBtn",authAction);
-  on("forgotPasswordBtn",forgotPassword);
-  on("switchAuth",toggleAuth);
-  on("backHome",backHome);
-  on("newChat",newChat);
-  on("navDashboard",() => { setPage("dashboard"); loadDashboard(); });
-  on("navChat",() => setPage("chat"));
-  on("navUpload",() => setPage("upload"));
-  on("navPlan",() => setPage("plan"));
-  on("navQuiz",() => setPage("quiz"));
-  on("navFlashcards",() => setPage("flashcards"));
-  on("navProgress",loadProgress);
-  on("navProfile",loadProfile);
-  on("navParent",loadParent);
-  on("navTeacher",() => setPage("teacher"));
-  on("navPricing",() => setPage("pricing"));
-  on("mobileMenuBtn",() => el("sideMenu")?.classList.toggle("open"));
-  on("logoutBtn",logout);
-  on("sendBtn",send);
-  on("voiceBtn",startVoice);
-  on("uploadBtn",uploadHomework);
-  on("makePlan",makePlan);
-  on("makeQuiz",makeQuiz);
-  on("makeFlash",makeFlash);
-  on("studyFlashcard",flipCurrentFlashcard);
-  on("flipFlashcard",flipCurrentFlashcard);
-  on("nextFlashcard",nextFlashcard);
-  on("previousFlashcard",previousFlashcard);
-  on("shuffleFlashcards",shuffleFlashcards);
-  on("readFlashcard",readCurrentFlashcard);
-  on("explainFlashcard",explainCurrentFlashcard);
-  on("loadTeacher",loadTeacher);
-  on("startTrialBtn",startTrial);
-  on("stripeUpgrade",stripeUpgrade);
-  on("tourNextBtn",nextTourStep);
+  on("loginTop", showLogin);
+  on("startTop", showSignup);
+  on("startHero", showSignup);
+  on("pricingBtn", () => {
+    const p = el("pricing");
+    if(p) p.scrollIntoView();
+  });
+  on("startFreePrice", showSignup);
+  on("premiumPrice", showSignup);
+  on("forgotPasswordBtn", forgotPassword);
+  on("authBtn", authAction);
+  on("switchAuth", toggleAuth);
+  on("backHome", backHome);
+  on("newChat", newChat);
+  on("navDashboard", () => { setPage("dashboard"); loadDashboard(); });
+  on("navChat", () => setPage("chat"));
+  on("navUpload", () => setPage("upload"));
+  on("navPlan", () => setPage("plan"));
+  on("navTools", () => setPage("tools"));
+  on("navProgress", loadProgress);
+  on("navProfile", loadProfile);
+  on("navParent", loadParent);
+  on("navTeacher", () => setPage("teacher"));
+  on("navPricing", () => setPage("pricing"));
+  on("navDebug", () => setPage("debug"));
+on("mobileMenuBtn", () => {
+  el("sideMenu")?.classList.toggle("open");
+});
+  on("logoutBtn", logout);
+  on("sendBtn", send);
+  on("voiceBtn", startVoice);
+  on("uploadBtn", uploadHomework);
+  on("makePlan", makePlan);
+  on("quickPlan", () => {
+    setPage("plan");
+    const p = el("planGoal");
+    if(p) p.value = "Improve this week";
+  });
+  on("makeQuiz", makeQuiz);
+  on("makeFlash", makeFlash);
+  on("loadTeacher", loadTeacher);
+  on("startTrialBtn", startTrial);
+  on("stripeUpgrade", stripeUpgrade);
+  on("runDebug", runDebug);
 
-  el("message")?.addEventListener("keydown",event => {
-    if(event.key === "Enter" && !event.shiftKey){
-      event.preventDefault();
+  key("message", e => {
+    if(e.key === "Enter" && !e.shiftKey){
+      e.preventDefault();
       send();
     }
   });
-  document.addEventListener("keydown",handleFlashcardKeyboard);
-  el("studyFlashcard")?.addEventListener("touchstart",handleFlashcardTouchStart,{passive:true});
-  el("studyFlashcard")?.addEventListener("touchend",handleFlashcardTouchEnd,{passive:true});
+
   wirePromptButtons();
+
   if(token) showApp();
 });
