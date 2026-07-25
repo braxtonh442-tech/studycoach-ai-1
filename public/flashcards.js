@@ -25,6 +25,8 @@ let current = 0;
 let showingFront = true;
 
 const card = document.getElementById("card");
+const frontText = document.getElementById("frontText");
+const backText = document.getElementById("backText");
 const counter = document.getElementById("counter");
 const bar = document.getElementById("bar");
 
@@ -32,13 +34,19 @@ function renderCard(){
 
     const c = cards[current];
 
-    card.textContent = showingFront ? c.front : c.back;
+    frontText.textContent = c.front;
+    backText.textContent = c.back;
 
-    counter.textContent = `Card ${current+1} of ${cards.length}`;
+    counter.textContent = `Card ${current + 1} of ${cards.length}`;
 
     bar.max = cards.length;
+    bar.value = current + 1;
 
-    bar.value = current+1;
+    if(showingFront){
+        card.classList.remove("flipped");
+    }else{
+        card.classList.add("flipped");
+    }
 
 }
 
@@ -46,18 +54,16 @@ function flipCard(){
 
     showingFront = !showingFront;
 
-    renderCard();
+    card.classList.toggle("flipped");
 
 }
 
 function nextCard(){
 
-    if(current < cards.length-1){
+    if(current < cards.length - 1){
 
         current++;
-
         showingFront = true;
-
         renderCard();
 
     }
@@ -69,15 +75,12 @@ function previousCard(){
     if(current > 0){
 
         current--;
-
         showingFront = true;
-
         renderCard();
 
     }
 
 }
-
 card.addEventListener("click",flipCard);
 
 renderCard();
