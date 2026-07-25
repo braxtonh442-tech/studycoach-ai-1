@@ -634,7 +634,6 @@ const calendarDays = [];
 const startDate = new Date(today);
 const dayOfWeek = startDate.getDay(); // Sun=0, Mon=1
 const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-
 startDate.setDate(today.getDate() - mondayOffset - 21);
 
 for (let i = 0; i < 28; i++) {
@@ -1049,34 +1048,113 @@ function normaliseFlashcards(data){
     data?.flashcards?.cards ||
     data?.cards ||
     data?.flashcards ||
+    data?.results ||
     [];
 
   if(!Array.isArray(cards)) return [];
 
+  const clean = value => String(value ?? "").trim();
+
+  const firstDifferentAnswer = (front, candidates) => {
+    const frontClean = clean(front).toLowerCase();
+
+    for(const candidate of candidates){
+      const answer = clean(candidate);
+
+      if(answer && answer.toLowerCase() !== frontClean){
+        return answer;
+      }
+    }
+
+    return "";
+  };
+
   return cards.map(card => {
+    if(Array.isArray(card)){
+      const front = clean(card[0]);
+      const back = firstDifferentAnswer(front, card.slice(1));
+
+      return { front, back };
+    }
+
     if(typeof card === "string"){
-      const parts = card.split(":");
+      const raw = card.trim();
+
+      const labelled = raw.match(
+        /(?:question|front|term)\s*:\s*([\s\S]*?)(?:\n|\r\n?|\s{2,})(?:answer|back|definition)\s*:\s*([\s\S]*)/i
+      );
+
+      if(labelled){
+        return {
+          front: clean(labelled[1]),
+          back: clean(labelled[2])
+        };
+      }
+
+      const separators = ["|||", " :: ", " — ", " - ", "\n"];
+
+      for(const separator of separators){
+        if(raw.includes(separator)){
+          const parts = raw.split(separator);
+          const front = clean(parts.shift());
+          const back = clean(parts.join(separator));
+
+          if(front && back && front.toLowerCase() !== back.toLowerCase()){
+            return { front, back };
+          }
+        }
+      }
+
+      const colonIndex = raw.indexOf(":");
+
+      if(colonIndex > 0){
+        const front = clean(raw.slice(0, colonIndex));
+        const back = clean(raw.slice(colonIndex + 1));
+
+        return {
+          front,
+          back:
+            back && back.toLowerCase() !== front.toLowerCase()
+              ? back
+              : "Answer unavailable for this card."
+        };
+      }
+
       return {
-        front: (parts.shift() || "Question").trim(),
-        back: parts.join(":").trim() || "Answer"
+        front: raw,
+        back: "Answer unavailable for this card."
       };
     }
 
+    const front = clean(
+      card?.question ??
+      card?.Question ??
+      card?.front ??
+      card?.Front ??
+      card?.term ??
+      card?.Term ??
+      card?.prompt ??
+      card?.title
+    );
+
+    const back = firstDifferentAnswer(front, [
+      card?.answer,
+      card?.Answer,
+      card?.definition,
+      card?.Definition,
+      card?.back,
+      card?.Back,
+      card?.response,
+      card?.explanation,
+      card?.meaning,
+      card?.content
+    ]);
+
     return {
-      front: String(
-        card?.front ??
-        card?.question ??
-        card?.term ??
-        ""
-      ).trim(),
-      back: String(
-        card?.back ??
-        card?.answer ??
-        card?.definition ??
-        ""
-      ).trim()
+      front,
+      back: back || "Answer unavailable for this card."
     };
-  }).filter(card => card.front && card.back);
+  }).filter(card => card.front);
 }
 
 async function makeFlash(){
@@ -1193,7 +1271,7 @@ function nextFlashcard(){
         <h2>You studied ${currentFlashcards.length} flashcards</h2>
         <p>Great work. Repeat the set or create a new topic.</p>
         <div class="flashcard-controls">
-          <button onclick="restartFlashcards()">Study again</button>
+         <button onclick="restartFlashcards()">Study again</button>
           <button class="secondary" onclick="focusFlashTopic()">
             New topic
           </button>
