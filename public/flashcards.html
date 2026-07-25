@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyCoach AI - Flashcards</title>
+
+<style>
+
+body{
+    font-family:Arial,sans-serif;
+    background:#f5f7fb;
+    margin:0;
+}
+
+header{
+    background:#2563eb;
+    color:white;
+    padding:18px;
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    padding:30px;
+}
+
+.progress{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.card{
+
+    width:100%;
+    height:420px;
+
+    background:white;
+
+    border-radius:20px;
+
+    box-shadow:0 12px 30px rgba(0,0,0,.12);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:34px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.6s;
+
+    text-align:center;
+
+    padding:40px;
+
+}
+
+.buttons{
+
+margin-top:25px;
+
+display:flex;
+
+justify-content:center;
+
+gap:20px;
+
+}
+
+button{
+
+padding:15px 28px;
+
+font-size:18px;
+
+border:none;
+
+border-radius:10px;
+
+cursor:pointer;
+
+background:#2563eb;
+
+color:white;
+
+}
+
+button:hover{
+
+background:#1d4ed8;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+📚 Flashcards
+
+</header>
+
+<div class="container">
+
+<div class="progress">
+
+<h2 id="topic">Biology</h2>
+
+<h3 id="counter">Card 1 of 5</h3>
+
+<progress id="bar" value="1" max="5" style="width:100%;height:18px;"></progress>
+
+</div>
+
+<div class="card" id="card">
+
+Loading...
+
+</div>
+
+<div class="buttons">
+
+<button onclick="previousCard()">⬅ Previous</button>
+
+<button onclick="flipCard()">🔄 Flip</button>
+
+<button onclick="nextCard()">Next ➜</button>
+
+</div>
+
+</div>
+
+<script src="flashcards.js"></script>
+
+</body>
+</html>
