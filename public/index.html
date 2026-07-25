@@ -165,8 +165,8 @@
       <button id="navChat">AI Tutor</button>
       <button id="navUpload">Homework Upload</button>
       <button id="navPlan">Study Plan</button>
-      <button id="navQuiz">Quiz</button>
-      <button id="navFlashcards">Flashcards</button>
+      <button id="navQuiz">📝 Quiz</button>
+      <button id="navFlashcards">🃏 Flashcards</button>
       <button id="navProgress">Progress</button>
       <button id="navProfile">🧠 My AI Profile</button>
       <button id="navParent">Parent View</button>
@@ -258,23 +258,98 @@
         </div>
       </section>
 
-      <section id="toolsPage" class="page">
-        <h2>Quiz & Flashcards</h2>
+      <section id="quizPage" class="page">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">AI Practice</p>
+            <h2>📝 Quiz</h2>
+            <p>Create a quiz for the selected subject and year level.</p>
+          </div>
+        </div>
 
-        <div class="toolgrid">
-          <div class="panel">
-            <h3>Quiz maker</h3>
-            <input id="quizTopic" placeholder="Topic">
+        <div class="panel">
+          <h3>AI Quiz Maker</h3>
+          <div class="tool-generator">
+            <input id="quizTopic" placeholder="Enter a topic, for example Photosynthesis">
             <button id="makeQuiz">Make quiz</button>
-            <div id="quizOut" class="output"></div>
+          </div>
+          <div id="quizOut" class="output"></div>
+        </div>
+      </section>
+
+      <section id="flashcardsPage" class="page">
+        <div class="flashcards-header">
+          <div>
+            <p class="eyebrow">AI Study Cards</p>
+            <h2>🃏 Flashcards</h2>
+            <p>Create a set, flip through each card and track your progress.</p>
           </div>
 
-          <div class="panel">
-            <h3>Flashcards</h3>
-            <input id="flashTopic" placeholder="Topic">
-            <button id="makeFlash">Make flashcards</button>
-            <div id="flashOut" class="output"></div>
+          <div class="flashcards-header-actions">
+            <button id="readFlashcard" class="secondary" type="button">🔊 Read aloud</button>
+            <button id="explainFlashcard" class="secondary" type="button">✨ AI explain</button>
           </div>
+        </div>
+
+        <div class="panel flashcards-panel">
+          <div class="flashcards-generator">
+            <input id="flashTopic" placeholder="Enter a topic, for example Photosynthesis">
+            <button id="makeFlash">Make flashcards</button>
+          </div>
+
+          <div id="flashLoading" class="flash-loading hidden" aria-live="polite">
+            Creating your flashcards...
+          </div>
+
+          <div id="flashcardStudyArea" class="hidden">
+            <div class="flashcard-meta">
+              <span id="flashCounter">Card 1 of 1</span>
+
+              <div class="flashcard-meta-actions">
+                <button id="shuffleFlashcards" class="secondary" type="button">🔀 Shuffle</button>
+              </div>
+            </div>
+
+            <div class="flash-progress-track" aria-label="Flashcard progress">
+              <div id="flashProgressFill" class="flash-progress-fill"></div>
+            </div>
+
+            <div
+              id="studyFlashcard"
+              class="study-flashcard"
+              role="button"
+              tabindex="0"
+              aria-label="Flashcard. Press Enter or Space to flip."
+            >
+              <div class="study-flashcard-inner">
+                <div class="study-flashcard-face study-flashcard-front">
+                  <p class="flash-side-label">QUESTION</p>
+                  <div id="flashFrontText" class="flashcard-text"></div>
+                  <small>Tap the card to flip</small>
+                </div>
+
+                <div class="study-flashcard-face study-flashcard-back">
+                  <p class="flash-side-label">ANSWER</p>
+                  <div id="flashBackText" class="flashcard-text"></div>
+                  <small>Tap the card to see the question</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="flashcard-controls">
+              <button id="previousFlashcard" class="secondary" type="button">← Previous</button>
+              <button id="flipFlashcard" type="button">Flip</button>
+              <button id="nextFlashcard" type="button">Next →</button>
+            </div>
+
+            <p class="flashcard-help">
+              Keyboard: ← previous, Space to flip, → next.
+            </p>
+
+            <div id="flashExplainOut" class="output hidden"></div>
+          </div>
+
+          <div id="flashOut" class="output hidden"></div>
         </div>
       </section>
 
