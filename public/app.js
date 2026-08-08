@@ -1856,6 +1856,7 @@ document.addEventListener("DOMContentLoaded", () => {
   on("backHome", backHome);
   on("newChat", newChat);
   on("navDashboard", () => { setPage("dashboard"); loadDashboard(); });
+  on("navLibrary", () => setPage("library"));
   on("navChat", () => setPage("chat"));
   on("navUpload", () => setPage("upload"));
   on("navPlan", () => setPage("plan"));
